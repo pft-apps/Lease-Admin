@@ -484,7 +484,7 @@ export const RoadmapReportModal: React.FC<RoadmapReportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-900/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-3xl max-w-6xl w-full h-[94vh] flex flex-col shadow-2xl border border-slate-300 overflow-hidden print:h-auto print:max-w-none print:shadow-none print:border-none print:rounded-none">
+      <div className="bg-white rounded-3xl max-w-[95vw] xl:max-w-7xl w-full h-[94vh] flex flex-col shadow-2xl border border-slate-300 overflow-hidden print:h-auto print:max-w-none print:shadow-none print:border-none print:rounded-none">
         {/* Top Control Toolbar (Hidden on Print) */}
         <div className="no-print bg-[#06234D] text-white p-4 px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#003886] shrink-0">
           <div className="flex items-center gap-3">

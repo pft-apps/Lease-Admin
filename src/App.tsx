@@ -183,9 +183,37 @@ export default function App() {
     }
     if (data.questions && Array.isArray(data.questions)) setQuestions(data.questions);
     if (data.riskPoints && Array.isArray(data.riskPoints)) setRiskPoints(data.riskPoints);
-    if (data.combinedData && Array.isArray(data.combinedData)) setCombinedData(data.combinedData);
-    if (data.officeData && Array.isArray(data.officeData)) setOfficeData(data.officeData);
-    if (data.retailData && Array.isArray(data.retailData)) setRetailData(data.retailData);
+
+    const mergeGanttPhases = (initialPhases: GanttPhase[], savedPhases: GanttPhase[]): GanttPhase[] => {
+      return initialPhases.map((ip) => {
+        const savedPhase = savedPhases.find((sp) => sp.id === ip.id);
+        if (!savedPhase) return ip;
+
+        const mergedTasks = ip.tasks.map((it) => {
+          const savedTask = savedPhase.tasks?.find((st) => st.id === it.id);
+          if (!savedTask) return it;
+          return {
+            ...it,
+            completed: typeof savedTask.completed === 'boolean' ? savedTask.completed : it.completed,
+            dateStr: savedTask.dateStr || it.dateStr,
+            stakeholders: savedTask.stakeholders || it.stakeholders,
+          };
+        });
+
+        return {
+          ...ip,
+          status: savedPhase.status || ip.status,
+          statusText: savedPhase.statusText || ip.statusText,
+          dateRange: savedPhase.dateRange || ip.dateRange,
+          tasks: mergedTasks,
+        };
+      });
+    };
+
+    if (data.combinedData && Array.isArray(data.combinedData)) setCombinedData(mergeGanttPhases(combinedGanttPhases, data.combinedData));
+    if (data.officeData && Array.isArray(data.officeData)) setOfficeData(mergeGanttPhases(officeGanttPhases, data.officeData));
+    if (data.retailData && Array.isArray(data.retailData)) setRetailData(mergeGanttPhases(retailGanttPhases, data.retailData));
+
     if (data.pillars && Array.isArray(data.pillars)) setPillars(data.pillars);
     if (data.masterPics && Array.isArray(data.masterPics)) setMasterPics(data.masterPics);
     if (data.trackLeads) setTrackLeads(data.trackLeads);

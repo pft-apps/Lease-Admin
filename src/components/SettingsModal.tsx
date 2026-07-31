@@ -96,7 +96,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#06234D]/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-4xl rounded-3xl border border-slate-200 shadow-2xl overflow-hidden animate-fadeIn flex flex-col max-h-[90vh]">
+      <div className="bg-white w-full max-w-[90vw] lg:max-w-6xl rounded-3xl border border-slate-200 shadow-2xl overflow-hidden animate-fadeIn flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="bg-gradient-to-r from-[#002B5B] via-[#003366] to-[#0055a5] p-6 text-white flex-shrink-0">
           <div className="flex justify-between items-center">

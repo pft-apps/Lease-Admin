@@ -146,6 +146,9 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
       ? masterPics.map((p) => ({ fullName: p.fullName, position: p.position }))
       : STANDARD_PIC_OPTIONS.map((name) => ({ fullName: name }));
 
+  // Whether edits are allowed on the current tab
+  const canEdit = isEditMode && activeTab !== 'combined';
+
   // Extract stakeholders for filter dropdown
   const allStakeholders = Array.from(
     new Set([
@@ -173,7 +176,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
 
   // Checkbox toggle for individual task
   const toggleTask = (phaseId: string, taskId: string) => {
-    if (!isEditMode) return;
+    if (!canEdit) return;
     setCurrentPhases((prevPhases) =>
       prevPhases.map((phase) => {
         if (phase.id !== phaseId) return phase;
@@ -209,7 +212,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
 
   // Batch toggle for phase
   const toggleAllPhaseTasks = (phaseId: string, targetState: boolean) => {
-    if (!isEditMode) return;
+    if (!canEdit) return;
     setCurrentPhases((prevPhases) =>
       prevPhases.map((phase) => {
         if (phase.id !== phaseId) return phase;
@@ -225,7 +228,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   };
 
   const updateTaskRemark = (phaseId: string, taskId: string, remarkText: string) => {
-    if (!isEditMode) return;
+    if (!canEdit) return;
     setCurrentPhases((prevPhases) =>
       prevPhases.map((phase) => {
         if (phase.id !== phaseId) return phase;
@@ -245,7 +248,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
     taskId: string,
     newStakeholders: string[]
   ) => {
-    if (!isEditMode) return;
+    if (!canEdit) return;
     setCurrentPhases((prevPhases) =>
       prevPhases.map((phase) => {
         if (phase.id !== phaseId) return phase;
@@ -261,7 +264,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   };
 
   const updatePhaseDateRange = (phaseId: string, newDateRange: string) => {
-    if (!isEditMode) return;
+    if (!canEdit) return;
     setCurrentPhases((prevPhases) =>
       prevPhases.map((phase) =>
         phase.id === phaseId ? { ...phase, dateRange: newDateRange } : phase
@@ -270,7 +273,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   };
 
   const updateTaskDateStr = (phaseId: string, taskId: string, newDateStr: string) => {
-    if (!isEditMode) return;
+    if (!canEdit) return;
     setCurrentPhases((prevPhases) =>
       prevPhases.map((phase) => {
         if (phase.id !== phaseId) return phase;
@@ -507,23 +510,23 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                     <strong className="text-slate-200">{trackLeads[track.id] || track.lead}</strong>
                     <button
                       type="button"
-                      disabled={!isEditMode}
+                      disabled={!canEdit}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!isEditMode) return;
+                        if (!canEdit) return;
                         setEditingTrackLeadId(track.id);
                         setEditingTrackLeadValue(trackLeads[track.id] || track.lead);
                         setCustomTrackLeadInput('');
                         setIsCustomTrackLead(false);
                       }}
                       className={`p-1 transition ${
-                        isEditMode
+                        canEdit
                           ? 'text-slate-400 hover:text-blue-300 cursor-pointer'
                           : 'text-slate-600 cursor-not-allowed'
                       }`}
-                      title={isEditMode ? 'Edit Track PIC' : 'Activate Edit Mode in header to edit'}
+                      title={canEdit ? 'Edit Track PIC' : 'Activate Edit Mode in header to edit'}
                     >
-                      <i className={`fa-solid ${isEditMode ? 'fa-pen-to-square' : 'fa-lock'} text-[10px]`}></i>
+                      <i className={`fa-solid ${canEdit ? 'fa-pen-to-square' : 'fa-lock'} text-[10px]`}></i>
                     </button>
                   </span>
                 )}
@@ -863,23 +866,23 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                             ) : (
                               <button
                                 type="button"
-                                disabled={!isEditMode}
+                                disabled={!canEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (!isEditMode) return;
+                                  if (!canEdit) return;
                                   setEditingPhaseDateId(phase.id);
                                   setEditingPhaseDateValue(phase.dateRange);
                                 }}
                                 className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold shadow-2xs group/pdate ${
-                                  isEditMode
+                                  canEdit
                                     ? 'text-slate-700 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition-all cursor-pointer'
                                     : 'text-slate-500 bg-slate-100 border border-slate-200 cursor-not-allowed'
                                 }`}
-                                title={isEditMode ? 'Click to edit phase target date range' : 'Activate Edit Mode in header to edit phase dates'}
+                                title={canEdit ? 'Click to edit phase target date range' : 'Activate Edit Mode in header to edit phase dates'}
                               >
                                 <i className="fa-regular fa-calendar-days text-[#007BFF] text-[11px]"></i>
                                 <span>{phase.dateRange}</span>
-                                {isEditMode && (
+                                {canEdit && (
                                   <i className="fa-solid fa-pen-to-square text-[10px] text-slate-400 group-hover/pdate:text-[#007BFF] transition-colors ml-0.5"></i>
                                 )}
                               </button>
@@ -908,18 +911,18 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                         </div>
 
                         <button
-                          disabled={!isEditMode}
+                          disabled={!canEdit}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!isEditMode) return;
+                            if (!canEdit) return;
                             toggleAllPhaseTasks(phase.id, !isPhaseAllCompleted);
                           }}
                           className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-colors flex items-center gap-1.5 shadow-2xs ${
-                            isEditMode
+                            canEdit
                               ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer'
                               : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
                           }`}
-                          title={isEditMode ? 'Check or uncheck all phase tasks' : 'Activate Edit Mode in header to modify tasks'}
+                          title={canEdit ? 'Check or uncheck all phase tasks' : 'Activate Edit Mode in header to modify tasks'}
                         >
                           <i
                             className={`fa-solid ${
@@ -976,8 +979,8 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                   <input
                                     type="checkbox"
                                     checked={task.completed}
-                                    disabled={!isEditMode}
-                                    onChange={() => isEditMode && toggleTask(phase.id, task.id)}
+                                    disabled={!canEdit}
+                                    onChange={() => canEdit && toggleTask(phase.id, task.id)}
                                     className="mt-1 w-4 h-4 rounded text-[#007BFF] focus:ring-[#007BFF] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer accent-[#007BFF]"
                                   />
 
@@ -1051,22 +1054,22 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                       ) : (
                                         <button
                                           type="button"
-                                          disabled={!isEditMode}
+                                          disabled={!canEdit}
                                           onClick={() => {
-                                            if (!isEditMode) return;
+                                            if (!canEdit) return;
                                             setEditingTaskDateId(task.id);
                                             setEditingTaskDateValue(task.dateStr);
                                           }}
                                           className={`text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto px-2.5 py-1 rounded-md transition-all group/tdate shadow-2xs ${
-                                            isEditMode
+                                            canEdit
                                               ? 'text-slate-700 hover:text-[#003886] bg-slate-100/80 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 cursor-pointer'
                                               : 'text-slate-500 bg-slate-100 border border-slate-200 cursor-not-allowed'
                                           }`}
-                                          title={isEditMode ? 'Click to edit task target date' : 'Activate Edit Mode in header to edit task target date'}
+                                          title={canEdit ? 'Click to edit task target date' : 'Activate Edit Mode in header to edit task target date'}
                                         >
                                           <i className="fa-regular fa-calendar-check text-[#007BFF]"></i>
                                           <span>{task.dateStr}</span>
-                                          {isEditMode && (
+                                          {canEdit && (
                                             <i className="fa-solid fa-pen-to-square text-[10px] text-slate-400 group-hover/tdate:text-[#007BFF] transition-colors ml-0.5"></i>
                                           )}
                                         </button>
@@ -1210,7 +1213,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                                   className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-[#003366] text-[11px] font-bold border border-blue-200/80 shadow-2xs"
                                                 >
                                                   <span>{person}</span>
-                                                  {isEditMode && (
+                                                  {canEdit && (
                                                     <div className="inline-flex items-center gap-1 ml-0.5">
                                                       <button
                                                         type="button"
@@ -1323,9 +1326,9 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                           ) : (
                                             <select
                                               value=""
-                                              disabled={!isEditMode}
+                                              disabled={!canEdit}
                                               onChange={(e) => {
-                                                if (!isEditMode || !e.target.value) return;
+                                                if (!canEdit || !e.target.value) return;
                                                 const selectedValue = e.target.value;
                                                 if (selectedValue === '__custom__') {
                                                   setAddingCustomPicTaskId(task.id);
@@ -1341,12 +1344,12 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                                 }
                                               }}
                                               className={`border rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#007BFF] shadow-2xs ${
-                                                isEditMode
+                                                canEdit
                                                   ? 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 cursor-pointer'
                                                   : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                                               }`}
                                             >
-                                              <option value="">{isEditMode ? '+ Assign/Change PIC...' : 'PIC Locked'}</option>
+                                              <option value="">{canEdit ? '+ Assign/Change PIC...' : 'PIC Locked'}</option>
                                               <optgroup label="Master Data PICs Directory">
                                                 {picOptions.map((item) => (
                                                   <option
@@ -1384,13 +1387,13 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                       <input
                                         type="text"
                                         value={task.remarks || ''}
-                                        disabled={!isEditMode}
+                                        disabled={!canEdit}
                                         onChange={(e) =>
-                                          isEditMode && updateTaskRemark(phase.id, task.id, e.target.value)
+                                          canEdit && updateTaskRemark(phase.id, task.id, e.target.value)
                                         }
-                                        placeholder={isEditMode ? "Enter progress remarks, owner notes, or status update..." : "Read-only mode. Activate Edit Mode in header to edit remarks."}
+                                        placeholder={canEdit ? "Enter progress remarks, owner notes, or status update..." : "Read-only mode. Activate Edit Mode in header to edit remarks."}
                                         className={`w-full px-3 py-1.5 text-xs border rounded-lg transition-all ${
-                                          isEditMode
+                                          canEdit
                                             ? 'bg-slate-50/80 border-slate-200 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#007BFF] placeholder:text-slate-400'
                                             : 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed placeholder:text-slate-400'
                                         }`}
