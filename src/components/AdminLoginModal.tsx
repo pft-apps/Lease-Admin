@@ -38,7 +38,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
       setPassword('');
       onLoginSuccess();
     } else {
-      setErrorMsg('Invalid admin credentials. Default: admin / p@s$w0rD_07');
+      setErrorMsg('Invalid administrator credentials. Please check your username and password.');
     }
   };
 
@@ -113,22 +113,6 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
               </button>
             </div>
-          </div>
-
-          <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-            <span>Quick Auto-Fill Demo:</span>
-            <button
-              type="button"
-              onClick={() => {
-                setUsername('admin');
-                setPassword('p@s$w0rD_07');
-                setErrorMsg('');
-              }}
-              className="font-mono bg-slate-100 hover:bg-slate-200 text-[#003366] px-2.5 py-1 rounded font-bold transition border border-slate-300 cursor-pointer flex items-center gap-1"
-            >
-              <i className="fa-solid fa-bolt text-amber-500 text-[10px]"></i>
-              <span>admin / p@s$w0rD_07</span>
-            </button>
           </div>
 
           <div className="pt-2 flex justify-end gap-2">

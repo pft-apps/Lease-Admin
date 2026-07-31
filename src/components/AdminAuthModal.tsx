@@ -32,7 +32,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
       setPasscode('');
       onSuccess();
     } else {
-      setError('Invalid Admin Credentials. Default: admin / p@s$w0rD_07');
+      setError('Invalid administrator credentials. Please check your username and password.');
     }
   };
 
@@ -120,22 +120,6 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 <span>{error}</span>
               </p>
             )}
-
-            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-              <span>Quick Auto-Fill Demo:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('admin');
-                  setPasscode('p@s$w0rD_07');
-                  setError('');
-                }}
-                className="font-mono bg-slate-100 hover:bg-slate-200 text-[#003366] px-2.5 py-1 rounded font-bold transition border border-slate-300 cursor-pointer flex items-center gap-1"
-              >
-                <i className="fa-solid fa-bolt text-amber-500 text-[10px]"></i>
-                <span>admin / p@s$w0rD_07</span>
-              </button>
-            </div>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
