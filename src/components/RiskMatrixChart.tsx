@@ -23,7 +23,7 @@ interface RiskMatrixChartProps {
 export const RiskMatrixChart: React.FC<RiskMatrixChartProps> = ({
   riskPoints = defaultRiskPoints,
   onSaveRiskPoint,
-  isEditMode = true,
+  isEditMode = false,
 }) => {
   const [selectedPoint, setSelectedPoint] = useState<RiskPoint | null>(null);
   const [editingPoint, setEditingPoint] = useState<RiskPoint | null>(null);

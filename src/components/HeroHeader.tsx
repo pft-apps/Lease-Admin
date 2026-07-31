@@ -16,7 +16,7 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
   totalWorkingDays = 30,
   onUpdateTotalWorkingDays,
   onSaveAndCommit,
-  isEditMode = true,
+  isEditMode = false,
 }) => {
   const [isEditingWindow, setIsEditingWindow] = useState(false);
   const [tempStartDate, setTempStartDate] = useState(startDate);
@@ -88,7 +88,7 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
                 Mon–Fri Excl. Weekends
               </span>
 
-              {isEditMode && (
+              {isEditMode ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -102,6 +102,14 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
                   <i className="fa-solid fa-pen-to-square text-[11px]"></i>
                   <span>Edit Start Date</span>
                 </button>
+              ) : (
+                <span
+                  className="ml-2 px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-400 border border-slate-700/80 flex items-center gap-1.5 cursor-not-allowed select-none opacity-80"
+                  title="Activate Edit Mode in header to enable date modification"
+                >
+                  <i className="fa-solid fa-lock text-[10px] text-slate-500"></i>
+                  <span>Locked</span>
+                </span>
               )}
             </div>
 

@@ -13,7 +13,7 @@ export const PillarsGrid: React.FC<PillarsGridProps> = ({
   pillars: externalPillars,
   setPillars: externalSetPillars,
   onSaveAndCommit,
-  isEditMode = true,
+  isEditMode = false,
 }) => {
   const [internalPillars, setInternalPillars] = useState<AssessmentPillar[]>(() =>
     assessmentPillars.map((p) => ({

@@ -14,7 +14,7 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
   questions = defaultQuestions,
   onSaveQuestion,
   onSaveAndCommit,
-  isEditMode = true,
+  isEditMode = false,
 }) => {
   const [isCategoryItemsCollapsed, setIsCategoryItemsCollapsed] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');

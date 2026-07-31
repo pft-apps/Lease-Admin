@@ -18,7 +18,7 @@ export const AuditScorecard: React.FC<AuditScorecardProps> = ({
   onSelectGateForEdit,
   onOpenReportModal,
   onSaveAndCommit,
-  isEditMode = true,
+  isEditMode = false,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
@@ -158,7 +158,7 @@ export const AuditScorecard: React.FC<AuditScorecardProps> = ({
                   checked={gate.completed}
                   disabled={!isEditMode}
                   onChange={() => isEditMode && onToggleGate(gate.id)}
-                  className="w-5 h-5 mt-0.5 accent-blue-500 rounded disabled:opacity-40 cursor-pointer transition-transform active:scale-95"
+                  className={`w-5 h-5 mt-0.5 accent-blue-500 rounded disabled:opacity-40 transition-transform ${isEditMode ? 'cursor-pointer active:scale-95' : 'cursor-not-allowed'}`}
                 />
                 <div>
                   <div className="flex items-center gap-2">

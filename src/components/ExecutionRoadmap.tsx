@@ -65,7 +65,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   totalWorkingDays = 30,
   onUpdateTotalWorkingDays,
   onSaveAndCommit,
-  isEditMode = true,
+  isEditMode = false,
 }) => {
   const [activeTab, setActiveTab] = useState<TimelineTab>('combined');
 
