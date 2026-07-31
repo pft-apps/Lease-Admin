@@ -88,25 +88,21 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
                 Mon–Fri Excl. Weekends
               </span>
 
-              <button
-                type="button"
-                disabled={!isEditMode}
-                onClick={() => {
-                  if (!isEditMode) return;
-                  setTempStartDate(startDate);
-                  setTempWorkingDays(totalWorkingDays);
-                  setIsEditingWindow(true);
-                }}
-                className={`ml-2 px-2.5 py-1 text-xs font-bold rounded transition-all flex items-center gap-1.5 ${
-                  isEditMode
-                    ? 'bg-[#00C4E7] hover:bg-sky-300 text-[#06234D] cursor-pointer'
-                    : 'bg-slate-700 text-slate-400 cursor-not-allowed border border-slate-600'
-                }`}
-                title={isEditMode ? 'Edit Start Date of Assessment Window' : 'Activate Edit Mode in header to enable date modification'}
-              >
-                <i className={`fa-solid ${isEditMode ? 'fa-pen-to-square' : 'fa-lock'} text-[11px]`}></i>
-                <span>{isEditMode ? 'Edit Start Date' : 'Locked'}</span>
-              </button>
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTempStartDate(startDate);
+                    setTempWorkingDays(totalWorkingDays);
+                    setIsEditingWindow(true);
+                  }}
+                  className="ml-2 px-2.5 py-1 text-xs font-bold rounded transition-all flex items-center gap-1.5 bg-[#00C4E7] hover:bg-sky-300 text-[#06234D] cursor-pointer shadow-xs"
+                  title="Edit Start Date of Assessment Window"
+                >
+                  <i className="fa-solid fa-pen-to-square text-[11px]"></i>
+                  <span>Edit Start Date</span>
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-2 px-3.5 py-2 bg-[#002B66] rounded-lg text-xs font-medium border border-[#003886]">
