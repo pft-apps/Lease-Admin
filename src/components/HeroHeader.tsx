@@ -52,22 +52,19 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
   };
 
   return (
-    <header id="overview" className="pt-20 pb-10 px-2 sm:px-4 lg:px-6 bg-[#06234D] text-white relative overflow-hidden">
-      <div className="absolute -right-20 -top-20 w-96 h-96 bg-[#00C4E7]/15 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-[#7F59E9]/20 rounded-full blur-3xl pointer-events-none"></div>
-
+    <header id="overview" className="pt-20 pb-8 px-2 sm:px-4 lg:px-6 bg-[#06234D] text-white relative border-b border-[#003886]">
       <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
-        <div className="lg:w-2/3 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#003886] rounded-full border border-[#00C4E7]/40 text-xs font-semibold tracking-wide text-[#00C4E7] shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-[#00C4E7] animate-pulse"></span>
+        <div className="lg:w-2/3 space-y-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#003886] rounded-md border border-[#00C4E7]/30 text-xs font-semibold tracking-wide text-[#00C4E7]">
+            <span className="w-2 h-2 rounded-full bg-[#00C4E7]"></span>
             30-WORKING-DAY STRATEGIC READINESS ASSESSMENT (MON–FRI)
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-white">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white">
             Lease Administration
           </h1>
 
-          <p className="text-slate-200 text-base md:text-lg max-w-2xl leading-relaxed opacity-95">
+          <p className="text-slate-200 text-base md:text-lg max-w-2xl leading-relaxed">
             Transitioning operations from{' '}
             <span className="font-semibold text-white underline decoration-amber-400 decoration-2 underline-offset-2">
               "Lift-and-Shift"
@@ -79,15 +76,15 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
             Stabilizing and auditing ~1,150 active contracts to guarantee FBSC Enterprise Capability Hub operational excellence.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
             {/* Assessment Window Interactive Card */}
-            <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-[#003886]/70 hover:bg-[#003886] rounded-xl text-sm font-medium backdrop-blur-sm border border-[#00C4E7]/40 shadow-sm transition-all">
-              <i className="fa-regular fa-calendar-days text-[#00C4E7] text-base"></i>
+            <div className="flex flex-wrap items-center gap-2 px-3.5 py-2 bg-[#002B66] rounded-lg text-xs font-medium border border-[#00C4E7]/30">
+              <i className="fa-regular fa-calendar-days text-[#00C4E7]"></i>
               <span>
                 Assessment Window:{' '}
                 <strong className="text-[#00C4E7] font-bold">{totalWorkingDays} Working Days</strong> ({dateRangeStr})
               </span>
-              <span className="text-[10px] font-semibold bg-[#00C4E7]/20 text-[#00C4E7] px-2 py-0.5 rounded-full border border-[#00C4E7]/30">
+              <span className="text-[10px] font-semibold bg-[#00C4E7]/15 text-[#00C4E7] px-2 py-0.5 rounded border border-[#00C4E7]/25">
                 Mon–Fri Excl. Weekends
               </span>
 
@@ -100,7 +97,7 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
                   setTempWorkingDays(totalWorkingDays);
                   setIsEditingWindow(true);
                 }}
-                className={`ml-2 px-2.5 py-1 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 shadow-xs ${
+                className={`ml-2 px-2.5 py-1 text-xs font-bold rounded transition-all flex items-center gap-1.5 ${
                   isEditMode
                     ? 'bg-[#00C4E7] hover:bg-sky-300 text-[#06234D] cursor-pointer'
                     : 'bg-slate-700 text-slate-400 cursor-not-allowed border border-slate-600'
@@ -112,8 +109,8 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
               </button>
             </div>
 
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-[#003886]/60 rounded-xl text-sm font-medium backdrop-blur-sm border border-[#003886] shadow-sm">
-              <i className="fa-solid fa-file-contract text-[#00C4E7] text-base"></i>
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-[#002B66] rounded-lg text-xs font-medium border border-[#003886]">
+              <i className="fa-solid fa-file-contract text-[#00C4E7]"></i>
               <span>
                 Total Portfolio: <strong>~1,150 Active Leases</strong>
               </span>
@@ -123,38 +120,38 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
 
         {/* Hero Metric Card - Working Days Progress & Remaining Days */}
         <div className="lg:w-1/3 w-full flex justify-center">
-          <div className="glass-card p-7 rounded-3xl w-full max-w-sm text-center shadow-2xl relative border border-white/20 bg-[#003886]/50 backdrop-blur-md">
-            <div className="text-[11px] uppercase tracking-widest font-extrabold text-[#00C4E7] mb-1">
+          <div className="p-6 rounded-2xl w-full max-w-sm text-center border border-[#00C4E7]/30 bg-[#002B66]">
+            <div className="text-[10px] uppercase tracking-widest font-black text-[#00C4E7] mb-1">
               Working Days Progress Timeline
             </div>
             
             <div className="flex items-baseline justify-center gap-1.5 my-2">
-              <span className="text-2xl font-bold text-slate-300">Working Day</span>
-              <span className="text-5xl font-black text-white tracking-tight">{elapsedDays}</span>
-              <span className="text-xl font-bold text-[#00C4E7]">/ {totalWorkingDays}</span>
+              <span className="text-xl font-bold text-slate-300">Working Day</span>
+              <span className="text-4xl font-black text-white tracking-tight">{elapsedDays}</span>
+              <span className="text-lg font-bold text-[#00C4E7]">/ {totalWorkingDays}</span>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-3 w-full bg-slate-900/40 rounded-full my-3 overflow-hidden p-0.5 border border-white/10">
+            <div className="h-2.5 w-full bg-[#06234D] rounded-full my-3 overflow-hidden border border-[#003886]">
               <div 
-                className="h-full bg-gradient-to-r from-[#00C4E7] via-sky-400 to-emerald-400 rounded-full transition-all duration-500 shadow-xs"
+                className="h-full bg-[#00C4E7] rounded-full transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               ></div>
             </div>
 
             {/* Elapsed vs Remaining Split Badges */}
             <div className="grid grid-cols-2 gap-2 my-3">
-              <div className="bg-[#06234D]/80 border border-white/10 rounded-xl p-2 text-center">
-                <div className="text-[10px] uppercase font-bold text-slate-300">Elapsed</div>
-                <div className="text-base font-extrabold text-white">{elapsedDays} Working Days</div>
+              <div className="bg-[#06234D] border border-slate-700/60 rounded-lg p-2 text-center">
+                <div className="text-[10px] uppercase font-bold text-slate-400">Elapsed</div>
+                <div className="text-sm font-black text-white">{elapsedDays} Working Days</div>
               </div>
-              <div className="bg-[#003886]/80 border border-[#00C4E7]/30 rounded-xl p-2 text-center">
+              <div className="bg-[#06234D] border border-[#00C4E7]/30 rounded-lg p-2 text-center">
                 <div className="text-[10px] uppercase font-bold text-[#00C4E7]">Remaining</div>
-                <div className="text-base font-extrabold text-[#00C4E7]">{remainingDays} Working Days</div>
+                <div className="text-sm font-black text-[#00C4E7]">{remainingDays} Working Days</div>
               </div>
             </div>
 
-            <p className="text-xs text-slate-200 leading-relaxed font-medium">
+            <p className="text-xs text-slate-300 leading-relaxed font-medium">
               Currently on <strong>Working Day {elapsedDays}</strong> of the {totalWorkingDays}-working-day schedule (Monday to Friday) with <strong>{remainingDays} working days remaining</strong> (Ends {formatDateShort(endDate)}).
             </p>
           </div>
