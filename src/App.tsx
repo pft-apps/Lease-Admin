@@ -253,9 +253,30 @@ export default function App() {
     }
   }
 
-  // Load initial state on startup
+  // Load initial state on startup, on tab focus, and automatically every 15 minutes
   useEffect(() => {
+    // 1. Initial load / open trigger
     fetchLatestData();
+
+    // 2. Automatic Data Refresh every 15 minutes (900,000 ms)
+    const FIFTEEN_MINUTES_MS = 15 * 60 * 1000;
+    const intervalId = setInterval(() => {
+      fetchLatestData();
+    }, FIFTEEN_MINUTES_MS);
+
+    // 3. Trigger refresh when user opens or switches back to the tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchLatestData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Save & Commit State to IndexedDB & Power Automate Save Webhook
