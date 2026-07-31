@@ -1260,11 +1260,12 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                         </div>
 
                                         <div className="flex items-center gap-1.5 self-start sm:self-auto">
-                                          {addingCustomPicTaskId === task.id ? (
-                                            <div
-                                              className="inline-flex items-center gap-1 bg-white border border-[#007BFF] rounded-lg p-1 shadow-md"
-                                              onClick={(e) => e.stopPropagation()}
-                                            >
+                                          {activeTab !== 'combined' && (
+                                            addingCustomPicTaskId === task.id ? (
+                                              <div
+                                                className="inline-flex items-center gap-1 bg-white border border-[#007BFF] rounded-lg p-1 shadow-md"
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
                                               <input
                                                 type="text"
                                                 value={customNewPicInput}
@@ -1366,6 +1367,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                               </optgroup>
                                               <option value="__custom__">+ Add Custom PIC...</option>
                                             </select>
+                                            )
                                           )}
                                         </div>
                                       </div>
