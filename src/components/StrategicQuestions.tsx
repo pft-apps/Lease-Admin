@@ -16,7 +16,7 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
   onSaveAndCommit,
   isEditMode = true,
 }) => {
-  const [isCategoryItemsCollapsed, setIsCategoryItemsCollapsed] = useState<boolean>(false);
+  const [isCategoryItemsCollapsed, setIsCategoryItemsCollapsed] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDomain, setSelectedDomain] = useState<'All' | 'OPERATIONS' | 'INTEGRITY'>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');

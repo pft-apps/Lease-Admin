@@ -32,7 +32,7 @@ export const PillarsGrid: React.FC<PillarsGridProps> = ({
   const pillars = externalPillars || internalPillars;
   const setPillars = externalSetPillars || setInternalPillars;
 
-  const [selectedPillarNumber, setSelectedPillarNumber] = useState<string | null>('01');
+  const [selectedPillarNumber, setSelectedPillarNumber] = useState<string | null>(null);
   const [showAllChecklist, setShowAllChecklist] = useState<boolean>(false);
 
   const toggleItemCompletion = (pillarNumber: string, itemId: string) => {

@@ -4,7 +4,7 @@ import { portfolioCategories } from '../data/mockData';
 import { PortfolioCategory } from '../types';
 
 export const PortfolioBreakdown: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<PortfolioCategory | null>(portfolioCategories[0]);
+  const [selectedCategory, setSelectedCategory] = useState<PortfolioCategory | null>(null);
 
   const chartData = portfolioCategories.map((cat) => ({
     name: cat.label,

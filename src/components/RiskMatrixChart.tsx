@@ -25,11 +25,11 @@ export const RiskMatrixChart: React.FC<RiskMatrixChartProps> = ({
   onSaveRiskPoint,
   isEditMode = true,
 }) => {
-  const [selectedPoint, setSelectedPoint] = useState<RiskPoint | null>(riskPoints[1] || riskPoints[0] || null);
+  const [selectedPoint, setSelectedPoint] = useState<RiskPoint | null>(null);
   const [editingPoint, setEditingPoint] = useState<RiskPoint | null>(null);
 
   // Synchronize selectedPoint if points update
-  const currentSelected = riskPoints.find((p) => p.id === selectedPoint?.id) || selectedPoint || riskPoints[0];
+  const currentSelected = riskPoints.find((p) => p.id === selectedPoint?.id) || selectedPoint;
 
   return (
     <section id="risk-matrix" className="space-y-6">

@@ -111,28 +111,9 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   const [editingTaskDateValue, setEditingTaskDateValue] = useState<string>('');
 
   // Accordion state per tab
-  const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({
-    'comb-phase-0': true,
-    'comb-phase-1': true,
-    'comb-phase-2': true,
-    'comb-phase-3': false,
-    'off-phase-1': true,
-    'off-phase-2': true,
-    'off-phase-3': true,
-    'ret-phase-0': true,
-    'ret-phase-1': true,
-    'ret-phase-2': true,
-    'ret-phase-3': false,
-  });
+  const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
 
-  const [expandedSubDetails, setExpandedSubDetails] = useState<Record<string, boolean>>({
-    'comb-t2': true,
-    'comb-t10': true,
-    'comb-t13': true,
-    'ret-t1': true,
-    'ret-t7': true,
-    'ret-t9': true,
-  });
+  const [expandedSubDetails, setExpandedSubDetails] = useState<Record<string, boolean>>({});
 
   // Filter controls
   const [searchQuery, setSearchQuery] = useState('');
