@@ -87,7 +87,7 @@ export default function App() {
   const [masterPics, setMasterPics] = useState<MasterPIC[]>(initialMasterPics);
 
   // Active Section Tab State ('all' | 'overview' | 'risk-map' | 'roadmap' | 'pillars' | 'scorecard' | 'strategic-questions' | 'settings')
-  const [activeTab, setActiveTab] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('overview');
 
   const handleSelectTab = (tabId: string) => {
     if (tabId === 'settings') {
