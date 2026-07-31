@@ -1,0 +1,8 @@
+{
+  "name": "Remix Lease Administration Migration Dashboard",
+  "description": "Interactive Lease Administration Migration Readiness Infographic and Audit Assessment Tool",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

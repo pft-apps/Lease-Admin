@@ -1,0 +1,44 @@
+<svg width="600" height="90" viewBox="0 0 600 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,700&amp;display=swap');
+    .fbsc-brand {
+      font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      letter-spacing: -0.02em;
+    }
+    .filinvest-brand {
+      font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+    .hub-brand {
+      font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+    }
+  </style>
+  
+  <!-- Left Word: FBSC -->
+  <text x="10" y="52" class="fbsc-brand" fill="#0A2540">FBSC</text>
+
+  <!-- Center Origami Plane Icon -->
+  <g transform="translate(138, 12) scale(0.65)">
+    <!-- Cyan Upper Left Wing -->
+    <path d="M 0 35 L 36 22 L 30 46 Z" fill="#00C4E7" />
+    <!-- Purple Lower Left Fold -->
+    <path d="M 30 46 L 40 76 L 52 42 Z" fill="#8B5CF6" />
+    <!-- Dark Navy Main Right Wing -->
+    <path d="M 36 22 L 68 8 L 52 42 Z" fill="#0A2540" />
+    <path d="M 0 35 L 68 8 L 52 42 Z" fill="#0A2540" opacity="0.9" />
+  </g>
+
+  <!-- Right Block Top Text: Filinvest Business Services Corporation -->
+  <text x="210" y="32" class="filinvest-brand" fill="#0A2540">Filinvest Business Services Corporation</text>
+
+  <!-- Right Block Bottom Banner: ENTERPRISE CAPABILITY HUB -->
+  <rect x="208" y="40" width="375" height="26" rx="2" fill="#0A2540" />
+  <text x="220" y="58" class="hub-brand" fill="#FFFFFF">ENTERPRISE CAPABILITY HUB</text>
+</svg>

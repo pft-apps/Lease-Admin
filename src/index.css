@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Futura', 'Futura PT', 'Jost', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #E7EAEF;
+    color: #1e293b;
+  }
+}
+
+@layer utilities {
+  .bg-brand-primary {
+    background-color: #06234D;
+  }
+  .bg-brand-secondary {
+    background-color: #003886;
+  }
+  .bg-brand-turquoise {
+    background-color: #00C4E7;
+  }
+  .bg-brand-purple {
+    background-color: #7F59E9;
+  }
+  .bg-brand-canvas {
+    background-color: #E7EAEF;
+  }
+
+  .text-brand-primary {
+    color: #06234D;
+  }
+  .text-brand-secondary {
+    color: #003886;
+  }
+  .text-brand-turquoise {
+    color: #00C4E7;
+  }
+  .text-brand-purple {
+    color: #7F59E9;
+  }
+
+  .gradient-bg {
+    background: linear-gradient(135deg, #06234D 0%, #003886 60%, #00C4E7 100%);
+  }
+  .card-elevation {
+    box-shadow: 0 10px 25px -5px rgba(6, 35, 77, 0.07), 0 8px 10px -6px rgba(6, 35, 77, 0.02);
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #E7EAEF;
+}
+::-webkit-scrollbar-thumb {
+  background: #003886;
+  border-radius: 10px;
+}
