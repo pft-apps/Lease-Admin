@@ -1,7 +1,3 @@
-Please update `.github/workflows/deploy.yml` so that it builds the Vite project before publishing. 
-
-Use this exact content:
-
 name: Deploy to GitHub Pages
 
 on:
@@ -34,7 +30,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm install
 
       - name: Build project
         run: npm run build
