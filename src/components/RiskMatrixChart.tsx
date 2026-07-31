@@ -147,10 +147,16 @@ export const RiskMatrixChart: React.FC<RiskMatrixChartProps> = ({
                     style={{ backgroundColor: currentSelected.color }}
                   ></span>
                   <button
-                    onClick={() => setEditingPoint(currentSelected)}
-                    className="px-2 py-1 rounded bg-slate-800 hover:bg-emerald-600 hover:text-white text-emerald-400 text-xs font-bold transition cursor-pointer flex items-center gap-1 border border-slate-700"
+                    disabled={!isEditMode}
+                    onClick={() => isEditMode && setEditingPoint(currentSelected)}
+                    className={`px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1 border ${
+                      isEditMode
+                        ? 'bg-slate-800 hover:bg-emerald-600 hover:text-white text-emerald-400 border-slate-700 cursor-pointer shadow-xs'
+                        : 'bg-slate-800/40 text-slate-500 border-slate-800 cursor-not-allowed opacity-60'
+                    }`}
+                    title={isEditMode ? 'Edit Risk Profile Details' : 'Activate Edit Mode in header to enable editing'}
                   >
-                    <i className="fa-solid fa-pen-to-square"></i>
+                    <i className={`fa-solid ${isEditMode ? 'fa-pen-to-square' : 'fa-lock'} text-[11px]`}></i>
                     <span>Edit</span>
                   </button>
                 </div>
