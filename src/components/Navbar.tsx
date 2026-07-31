@@ -9,6 +9,7 @@ interface NavbarProps {
   onOpenReportModal: () => void;
   onOpenRoadmapReportModal?: () => void;
   onOpenSettings: () => void;
+  onSaveAndCommit?: () => void;
   onSync: () => void;
   syncStatus: 'synced' | 'linked' | 'local' | 'saving';
   isLinked: boolean;
@@ -23,6 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenReportModal,
   onOpenRoadmapReportModal,
   onOpenSettings,
+  onSaveAndCommit,
   onSync,
   syncStatus,
   isLinked,
@@ -54,18 +56,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Action Items */}
 
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Save & Sync Data Button */}
+          {/* Sync / Pull Data Button (GET from SharePoint REST API) */}
           <button
             onClick={onSync}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white rounded-xl text-xs font-extrabold shadow-md transition-all cursor-pointer ring-2 ring-emerald-400/30"
-            title={isLinked ? 'Save and commit all changes to linked storage file' : 'Save all changes to local IndexedDB database'}
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#003886] hover:bg-[#002866] active:scale-95 text-white rounded-xl text-xs font-semibold shadow-md transition-all cursor-pointer border border-[#00C4E7]/30"
+            title="Pull and sync latest data from storage"
           >
-            <i className={`fa-solid fa-floppy-disk text-xs ${syncStatus === 'saving' ? 'animate-spin' : ''}`}></i>
-            <span className="hidden sm:inline">Save & Sync Data</span>
-            <span className="sm:hidden">Save</span>
-            <span className="text-[10px] bg-black/25 px-1.5 py-0.5 rounded font-black">
-              {syncStatus === 'synced' ? 'Saved' : isLinked ? 'Linked File' : 'Local DB'}
-            </span>
+            <i className="fa-solid fa-arrows-rotate text-xs"></i>
+            <span className="hidden md:inline">Pull Storage</span>
           </button>
 
           {/* Live Gate Status Pill */}

@@ -163,6 +163,9 @@ export default function App() {
     };
   }, []);
 
+  // Power Automate Webhook URL for SharePoint Sync
+  const POWER_AUTOMATE_WEBHOOK_URL = "https://defaultcdb710b6704140938e6f80ac01d6c6.5a.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/20/workflows/b1f010f2869d4550801a1332e0639966/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sKHPYutK9tUmIPyhTxmkCLFhPZ9CbZwQp220pIZunEk";
+
   // SharePoint REST API Configuration
   const SHAREPOINT_SITE_URL = "https://filinvest.sharepoint.com/sites/FBSC-Finance";
   const SHAREPOINT_FILE_RELATIVE_URL = "/sites/FBSC-Finance/Shared Documents/Horizon_Lease_Admin_Migration_Data.json";
@@ -263,7 +266,8 @@ export default function App() {
   }, []);
 
   const handleFetchSharePointManual = async () => {
-    showToast('Connecting to SharePoint REST API...');
+    setSyncStatus('saving');
+    showToast('Pulling latest data from storage...');
     const spData = await fetchSharePointData();
     if (spData) {
       if (spData.startDate) setStartDate(spData.startDate);
@@ -282,16 +286,36 @@ export default function App() {
       setSyncStatus('synced');
       setLinkedFileName('Horizon_Lease_Admin_Migration_Data.json (SharePoint)');
       await saveStateToIndexedDB(spData);
-      showToast('Successfully refreshed data from SharePoint Document Library!');
+      showToast('Successfully pulled & synced latest data from SharePoint Document Library!');
     } else {
-      showToast('SharePoint REST API request failed. Ensure you are signed into SharePoint.');
+      const dbState = await loadStateFromIndexedDB();
+      if (dbState) {
+        if (dbState.startDate) setStartDate(dbState.startDate);
+        if (dbState.totalWorkingDays) setTotalWorkingDays(dbState.totalWorkingDays);
+        if (dbState.gates && Array.isArray(dbState.gates)) setGates(dbState.gates);
+        if (dbState.questions && Array.isArray(dbState.questions)) setQuestions(dbState.questions);
+        if (dbState.riskPoints && Array.isArray(dbState.riskPoints)) setRiskPoints(dbState.riskPoints);
+        if (dbState.combinedData && Array.isArray(dbState.combinedData)) setCombinedData(dbState.combinedData);
+        if (dbState.officeData && Array.isArray(dbState.officeData)) setOfficeData(dbState.officeData);
+        if (dbState.retailData && Array.isArray(dbState.retailData)) setRetailData(dbState.retailData);
+        if (dbState.pillars && Array.isArray(dbState.pillars)) setPillars(dbState.pillars);
+        if (dbState.masterPics && Array.isArray(dbState.masterPics)) setMasterPics(dbState.masterPics);
+        if (dbState.trackLeads) setTrackLeads(dbState.trackLeads);
+        if (dbState.lastSaved) setLastSavedTime(dbState.lastSaved);
+
+        setSyncStatus('synced');
+        showToast('Pulled & synced latest data from local storage!');
+      } else {
+        setSyncStatus('local');
+        showToast('SharePoint REST API request failed and no local stored data found.');
+      }
     }
   };
 
-  // Save & Commit State to IndexedDB & Linked File
-  const handleSaveAndCommit = async () => {
+  // Save & Commit State to Power Automate Webhook & IndexedDB
+  const handleSaveAndCommit = async (overrideState?: Partial<AppStorageState>) => {
     setSyncStatus('saving');
-    const stateToSave: AppStorageState = {
+    const updatedData: AppStorageState = {
       version: '2.5',
       lastSaved: new Date().toLocaleTimeString('en-US', {
         hour: '2-digit',
@@ -309,38 +333,38 @@ export default function App() {
       pillars,
       masterPics,
       trackLeads,
+      ...overrideState,
     };
 
-    // 1. Save to IndexedDB
-    await saveStateToIndexedDB(stateToSave);
+    // 1. Save state to local IndexedDB database
+    await saveStateToIndexedDB(updatedData);
 
-    // 2. Post to Web Worker for async processing
-    if (workerRef.current) {
-      workerRef.current.postMessage({
-        action: 'PROCESS_SAVE',
-        payload: stateToSave,
+    // 2. Send HTTP POST request to Power Automate Webhook
+    fetch(POWER_AUTOMATE_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(updatedData)
+    })
+      .then(response => {
+        if (response.ok) {
+          setSyncStatus('synced');
+          setLastSavedTime(updatedData.lastSaved);
+          showToast("Data successfully saved and updated on SharePoint!");
+          alert("Data successfully saved and updated on SharePoint!");
+        } else {
+          setSyncStatus('local');
+          showToast("Failed to save data. Please check connection.");
+          alert("Failed to save data. Please check connection.");
+        }
+      })
+      .catch(error => {
+        console.error("Save error:", error);
+        setSyncStatus('local');
+        showToast("Error communicating with update service.");
+        alert("Error communicating with update service.");
       });
-    }
-
-    // 3. Write to Linked File Handle if present
-    if (linkedFileHandle) {
-      try {
-        const jsonString = JSON.stringify(stateToSave, null, 2);
-        const writable = await (linkedFileHandle as any).createWritable();
-        await writable.write(jsonString);
-        await writable.close();
-        setSyncStatus('synced');
-        showToast(`Committed & Synced directly to linked file: ${linkedFileHandle.name}`);
-      } catch (err) {
-        console.warn('Could not write directly to file handle:', err);
-        setSyncStatus('linked');
-        showToast('Committed to IndexedDB local database (File handle write restricted in iframe).');
-      }
-    } else {
-      setSyncStatus('synced');
-      setLastSavedTime(stateToSave.lastSaved);
-      showToast('Committed & Saved all data to IndexedDB local database!');
-    }
   };
 
   const triggerFileInput = () => {
@@ -590,21 +614,21 @@ export default function App() {
   };
 
   const handleSaveGate = (updatedGate: AuditGate) => {
-    setGates((prev) =>
-      prev.map((g) => (g.id === updatedGate.id ? updatedGate : g))
-    );
+    const nextGates = gates.map((g) => (g.id === updatedGate.id ? updatedGate : g));
+    setGates(nextGates);
+    handleSaveAndCommit({ gates: nextGates });
   };
 
   const handleSaveQuestion = (updatedQuestion: StrategicQuestion) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
-    );
+    const nextQuestions = questions.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q));
+    setQuestions(nextQuestions);
+    handleSaveAndCommit({ questions: nextQuestions });
   };
 
   const handleSaveRiskPoint = (updatedRiskPoint: RiskPoint) => {
-    setRiskPoints((prev) =>
-      prev.map((r) => (r.id === updatedRiskPoint.id ? updatedRiskPoint : r))
-    );
+    const nextRiskPoints = riskPoints.map((r) => (r.id === updatedRiskPoint.id ? updatedRiskPoint : r));
+    setRiskPoints(nextRiskPoints);
+    handleSaveAndCommit({ riskPoints: nextRiskPoints });
   };
 
   return (
@@ -625,7 +649,7 @@ export default function App() {
         onOpenReportModal={() => setIsReportModalOpen(true)}
         onOpenRoadmapReportModal={() => setIsRoadmapReportModalOpen(true)}
         onOpenSettings={handleOpenSettingsClick}
-        onSync={handleSaveAndCommit}
+        onSync={handleFetchSharePointManual}
         syncStatus={syncStatus}
         isLinked={!!linkedFileHandle}
         isEditMode={isEditMode}
@@ -638,6 +662,7 @@ export default function App() {
         onUpdateStartDate={setStartDate}
         totalWorkingDays={totalWorkingDays}
         onUpdateTotalWorkingDays={setTotalWorkingDays}
+        onSaveAndCommit={handleSaveAndCommit}
         isEditMode={isEditMode}
       />
 
