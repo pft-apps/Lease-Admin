@@ -4,98 +4,98 @@ export const initialGates: AuditGate[] = [
   {
     id: 'gate-1',
     gateNumber: 1,
-    title: 'Approved RACI Matrix',
+    title: 'RACI Sign-Off',
     category: 'Governance',
-    description: 'Signed off cross-functional matrix defining clear boundaries between FBSC administrative processing and BU commercial sign-offs.',
+    description: 'Formal boundary matrix signed between FBSC Ops and BU Leadership.',
     completed: false,
     mandatoryForCutover: true,
     riskLevel: 'High',
-    notes: 'Draft shared with BU leads; pending final signature from Commercial Director.',
-    evidenceRef: 'DOC-RACI-2026-V2.1'
+    notes: 'Formal boundary matrix signed between FBSC Ops and BU Leadership.',
+    evidenceRef: 'DOC-RACI-2026-V1'
   },
   {
     id: 'gate-2',
     gateNumber: 2,
-    title: 'Documented SOPs & Exception Trees',
-    category: 'Process',
-    description: 'Standard Operating Procedures mapped out for all standard workflows and non-standard contract exception branch logic.',
+    title: 'Cleansed Master File',
+    category: 'Data',
+    description: '100% of the ~ 50 office accounts audited with zero critical data errors in IFCA.',
     completed: false,
     mandatoryForCutover: true,
     riskLevel: 'High',
-    notes: '14 SOPs completed, 3 exception decision trees in final review.',
-    evidenceRef: 'SOP-LA-2026-PKG'
+    notes: '100% of the ~ 50 office accounts audited with zero critical data errors in IFCA.',
+    evidenceRef: 'AUDIT-OFFICE-IFCA-01'
   },
   {
     id: 'gate-3',
     gateNumber: 3,
-    title: 'Cleansed Lease Inventory (Error ≤ 5%)',
-    category: 'Data',
-    description: 'Master contract database data scrubbed with audit error rate confirmed under the mandatory 5% threshold.',
+    title: 'System Access Continuity',
+    category: 'Technology',
+    description: 'Verified active FiLLS/eLMS/IFCA system access for all transferring team members.',
     completed: false,
     mandatoryForCutover: true,
     riskLevel: 'High',
-    notes: 'Batch 1 auditing completed (2.4% error rate). Batch 2 under active review.',
-    evidenceRef: 'AUDIT-DATA-082026'
+    notes: 'Verified active FiLLS/eLMS/IFCA system access for all transferring team members.',
+    evidenceRef: 'SYS-ACCESS-LOG-2026'
   },
   {
     id: 'gate-4',
     gateNumber: 4,
-    title: 'Digital Contract Repository',
+    title: 'Document Repository Ready',
     category: 'Technology',
-    description: '100% of physical and legacy digital contracts uploaded to centralized secure cloud document repository.',
+    description: 'Centralized digital archive structured with complete tenant folders.',
     completed: false,
     mandatoryForCutover: true,
     riskLevel: 'Medium',
-    notes: 'Repository provisioned; 88% of retail lease PDFs indexed.',
-    evidenceRef: 'CLOUD-REPO-LA-01'
+    notes: 'Centralized digital archive structured with complete tenant folders.',
+    evidenceRef: 'REPO-TENANT-ARCHIVE-01'
   },
   {
     id: 'gate-5',
     gateNumber: 5,
-    title: 'Validated Renewal Calendar',
-    category: 'Operations',
-    description: '60-90 day forward-looking renewal notice schedule verified with BU leasing managers to eliminate option lapse risks.',
+    title: 'SOP & SLA Formally Approved',
+    category: 'Process',
+    description: 'Standard operating procedure and turnaround times formally documented and signed off.',
     completed: false,
     mandatoryForCutover: true,
     riskLevel: 'High',
-    notes: 'Q3 & Q4 2026 renewal dates cross-checked against landlord notice windows.',
-    evidenceRef: 'CAL-RENEW-2026-Q3'
+    notes: 'Standard operating procedure and turnaround times formally documented and signed off.',
+    evidenceRef: 'SOP-SLA-SIGN-OFF-2026'
   },
   {
     id: 'gate-6',
     gateNumber: 6,
-    title: 'Billing Reconciliation Controls',
-    category: 'Governance',
-    description: 'Dual-check automated controls for turnover rent, CAM reconciliations, and annual escalation indexation.',
+    title: 'Staff Transfer Confirmed',
+    category: 'Operations',
+    description: 'HR and operational transfer of BU Office Leasing staff into FBSC completed.',
     completed: false,
     mandatoryForCutover: true,
     riskLevel: 'High',
-    notes: 'Reconciliation script tested against historical Q1 billing samples.',
-    evidenceRef: 'CTRL-FIN-BILL-09'
+    notes: 'HR and operational transfer of BU Office Leasing staff into FBSC completed.',
+    evidenceRef: 'HR-STAFF-XFER-2026'
   },
   {
     id: 'gate-7',
     gateNumber: 7,
-    title: 'Agreed 60–90 Day Hypercare Plan',
-    category: 'Operations',
-    description: 'Post go-live support framework with daily triage huddling and priority escalation SLAs established.',
+    title: 'Revenue Assurance Validation',
+    category: 'Governance',
+    description: 'Certification that all historical and current billing records, deposit balances and escalations are 100% reconciled and without variance.',
     completed: false,
     mandatoryForCutover: true,
-    riskLevel: 'Medium',
-    notes: 'Hypercare SLA document drafted and waiting for operations review.',
-    evidenceRef: 'PLAN-HYPERCARE-V1'
+    riskLevel: 'High',
+    notes: 'Certification that all historical and current billing records, deposit balances and escalations are 100% reconciled and without variance.',
+    evidenceRef: 'REV-ASSURE-CERT-2026'
   },
   {
     id: 'gate-8',
     gateNumber: 8,
-    title: 'Technology Selection & System Access',
-    category: 'Technology',
-    description: 'Final system bridge configuration across FiLLS/eLMS/IFCA with full role-based access granted to FBSC team.',
+    title: 'Capacity Sustainability Check',
+    category: 'Operations',
+    description: 'Formal validation that existing headcount is quantitatively sufficient to absorb steady-state volumes and renewal surges without persistent overtime.',
     completed: false,
     mandatoryForCutover: true,
-    riskLevel: 'High',
-    notes: 'Access permissions requested for 12 FBSC specialists.',
-    evidenceRef: 'SEC-IAM-FBSC-LA'
+    riskLevel: 'Medium',
+    notes: 'Formal validation that existing headcount is quantitatively sufficient to absorb steady-state volumes and renewal surges without persistent overtime.',
+    evidenceRef: 'CAP-MODEL-FBSC-2026'
   }
 ];
 

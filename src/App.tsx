@@ -87,7 +87,7 @@ export default function App() {
   const [masterPics, setMasterPics] = useState<MasterPIC[]>(initialMasterPics);
 
   // Active Section Tab State ('all' | 'overview' | 'risk-map' | 'roadmap' | 'pillars' | 'scorecard' | 'strategic-questions' | 'settings')
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<string>('scorecard');
 
   const handleSelectTab = (tabId: string) => {
     if (tabId === 'settings') {
@@ -171,7 +171,16 @@ export default function App() {
     if (!data) return;
     if (data.startDate) setStartDate(data.startDate);
     if (data.totalWorkingDays) setTotalWorkingDays(data.totalWorkingDays);
-    if (data.gates && Array.isArray(data.gates)) setGates(data.gates);
+    if (data.gates && Array.isArray(data.gates)) {
+      // Always preserve the updated initialGates schema (title, description, category, notes, evidenceRef) while keeping completion status
+      const mergedGates = initialGates.map((ig) => {
+        const matched = data.gates?.find((g: any) => g.id === ig.id || g.gateNumber === ig.gateNumber);
+        return matched
+          ? { ...ig, completed: typeof matched.completed === 'boolean' ? matched.completed : ig.completed }
+          : ig;
+      });
+      setGates(mergedGates);
+    }
     if (data.questions && Array.isArray(data.questions)) setQuestions(data.questions);
     if (data.riskPoints && Array.isArray(data.riskPoints)) setRiskPoints(data.riskPoints);
     if (data.combinedData && Array.isArray(data.combinedData)) setCombinedData(data.combinedData);
@@ -385,7 +394,7 @@ export default function App() {
         : {};
 
     const stateToSave: AppStorageState = {
-      version: '2.5',
+      version: '3.0',
       lastSaved: new Date().toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
