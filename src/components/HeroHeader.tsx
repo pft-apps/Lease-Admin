@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getAssessmentWorkingDaysProgress, formatDateRange, formatDateShort } from '../utils/workingDays';
 
 interface HeroHeaderProps {
@@ -6,6 +6,7 @@ interface HeroHeaderProps {
   onUpdateStartDate: (newDate: string) => void;
   totalWorkingDays?: number;
   onUpdateTotalWorkingDays?: (days: number) => void;
+  onSaveAndCommit?: (overrideState?: any) => void;
   isEditMode?: boolean;
 }
 
@@ -14,11 +15,20 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
   onUpdateStartDate,
   totalWorkingDays = 30,
   onUpdateTotalWorkingDays,
+  onSaveAndCommit,
   isEditMode = true,
 }) => {
   const [isEditingWindow, setIsEditingWindow] = useState(false);
   const [tempStartDate, setTempStartDate] = useState(startDate);
   const [tempWorkingDays, setTempWorkingDays] = useState(totalWorkingDays);
+
+  useEffect(() => {
+    setTempStartDate(startDate);
+  }, [startDate]);
+
+  useEffect(() => {
+    setTempWorkingDays(totalWorkingDays);
+  }, [totalWorkingDays]);
 
   const windowProgress = getAssessmentWorkingDaysProgress(startDate, totalWorkingDays, '2026-07-29');
   const { endDate, elapsedDays, remainingDays, progressPercent } = windowProgress;
@@ -31,6 +41,12 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
     }
     if (onUpdateTotalWorkingDays && tempWorkingDays > 0) {
       onUpdateTotalWorkingDays(tempWorkingDays);
+    }
+    if (onSaveAndCommit) {
+      onSaveAndCommit({
+        startDate: tempStartDate,
+        totalWorkingDays: tempWorkingDays,
+      });
     }
     setIsEditingWindow(false);
   };

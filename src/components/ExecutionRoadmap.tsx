@@ -6,7 +6,7 @@ import {
   comparativeMatrix,
   executiveDecouplingSummary,
 } from '../data/mockData';
-import { GanttPhase } from '../types';
+import { GanttPhase, MasterPIC } from '../types';
 import { getAssessmentWorkingDaysProgress, formatDateRange, formatDateShort } from '../utils/workingDays';
 
 type TimelineTab = 'combined' | 'office' | 'retail' | 'comparison';
@@ -37,6 +37,9 @@ interface ExecutionRoadmapProps {
   setOfficeData?: React.Dispatch<React.SetStateAction<GanttPhase[]>>;
   retailData?: GanttPhase[];
   setRetailData?: React.Dispatch<React.SetStateAction<GanttPhase[]>>;
+  masterPics?: MasterPIC[];
+  trackLeads?: Record<string, string>;
+  setTrackLeads?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   onOpenRoadmapReport?: () => void;
   startDate?: string;
   onUpdateStartDate?: (newDate: string) => void;
@@ -53,6 +56,9 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   setOfficeData: extSetOffice,
   retailData: extRetail,
   setRetailData: extSetRetail,
+  masterPics = [],
+  trackLeads: extTrackLeads,
+  setTrackLeads: extSetTrackLeads,
   onOpenRoadmapReport,
   startDate = '2026-07-20',
   onUpdateStartDate,
@@ -77,10 +83,28 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   const setRetailData = extSetRetail || setLocalRetail;
 
   // Inline Editing state for Track Leads & Target Dates
-  const [trackLeads, setTrackLeads] = useState<Record<string, string>>({
+  const [localTrackLeads, setLocalTrackLeads] = useState<Record<string, string>>({
     'track-a': 'Cely B. Atas',
     'track-b': 'Erickson T. Serrano / FBSC Hub',
   });
+  const trackLeads = extTrackLeads || localTrackLeads;
+  const setTrackLeads = extSetTrackLeads || setLocalTrackLeads;
+
+  // Track Lead inline editing state
+  const [editingTrackLeadId, setEditingTrackLeadId] = useState<string | null>(null);
+  const [editingTrackLeadValue, setEditingTrackLeadValue] = useState<string>('');
+  const [isCustomTrackLead, setIsCustomTrackLead] = useState<boolean>(false);
+  const [customTrackLeadInput, setCustomTrackLeadInput] = useState<string>('');
+
+  // Task PIC inline editing state
+  const [editingTaskPicKey, setEditingTaskPicKey] = useState<string | null>(null);
+  const [editingTaskPicValue, setEditingTaskPicValue] = useState<string>('');
+  const [isCustomTaskPicInput, setIsCustomTaskPicInput] = useState<boolean>(false);
+  const [customTaskPicInput, setCustomTaskPicInput] = useState<string>('');
+
+  const [addingCustomPicTaskId, setAddingCustomPicTaskId] = useState<string | null>(null);
+  const [customNewPicInput, setCustomNewPicInput] = useState<string>('');
+
   const [editingPhaseDateId, setEditingPhaseDateId] = useState<string | null>(null);
   const [editingPhaseDateValue, setEditingPhaseDateValue] = useState<string>('');
   const [editingTaskDateId, setEditingTaskDateId] = useState<string | null>(null);
@@ -135,10 +159,19 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   const overallProgressPct =
     totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
 
+  // Available PIC options from Master Data directory or fallback to standard options
+  const picOptions: { fullName: string; position?: string }[] =
+    masterPics && masterPics.length > 0
+      ? masterPics.map((p) => ({ fullName: p.fullName, position: p.position }))
+      : STANDARD_PIC_OPTIONS.map((name) => ({ fullName: name }));
+
   // Extract stakeholders for filter dropdown
   const allStakeholders = Array.from(
-    new Set(allTasks.flatMap((t) => t.stakeholders || []))
-  ).sort();
+    new Set([
+      ...picOptions.map((p) => p.fullName),
+      ...allTasks.flatMap((t) => t.stakeholders || []),
+    ])
+  ).filter(Boolean).sort();
 
   // Accordion Toggles
   const togglePhase = (phaseId: string) => {
@@ -420,30 +453,99 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                 {track.description}
               </p>
               <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 pt-2 border-t border-slate-700/50">
-                <span className="flex items-center gap-1.5">
-                  <span>PIC:</span>
-                  <strong className="text-slate-200">{trackLeads[track.id] || track.lead}</strong>
-                  <button
-                    type="button"
-                    disabled={!isEditMode}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!isEditMode) return;
-                      const newLead = prompt(`Edit PIC for ${track.title}:`, trackLeads[track.id] || track.lead);
-                      if (newLead !== null && newLead.trim() !== '') {
-                        setTrackLeads((prev) => ({ ...prev, [track.id]: newLead.trim() }));
-                      }
-                    }}
-                    className={`p-1 transition ${
-                      isEditMode
-                        ? 'text-slate-400 hover:text-blue-300 cursor-pointer'
-                        : 'text-slate-600 cursor-not-allowed'
-                    }`}
-                    title={isEditMode ? 'Edit Track PIC' : 'Activate Edit Mode in header to edit'}
+                {editingTrackLeadId === track.id ? (
+                  <div
+                    className="inline-flex items-center gap-1.5 bg-slate-900 border border-blue-400/80 rounded-lg p-1.5 shadow-lg text-xs"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <i className={`fa-solid ${isEditMode ? 'fa-pen-to-square' : 'fa-lock'} text-[10px]`}></i>
-                  </button>
-                </span>
+                    <select
+                      value={isCustomTrackLead ? '__custom__' : editingTrackLeadValue}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setIsCustomTrackLead(true);
+                        } else {
+                          setIsCustomTrackLead(false);
+                          setEditingTrackLeadValue(e.target.value);
+                        }
+                      }}
+                      className="bg-slate-800 text-white text-xs font-semibold border border-slate-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#00C4E7]"
+                    >
+                      <option value="">Select Track Lead PIC...</option>
+                      <optgroup label="Master Data PICs Directory">
+                        {picOptions.map((item) => (
+                          <option key={item.fullName} value={item.fullName}>
+                            {item.fullName}{item.position ? ` — ${item.position}` : ''}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <option value="__custom__">+ Enter Custom PIC Name...</option>
+                    </select>
+
+                    {isCustomTrackLead && (
+                      <input
+                        type="text"
+                        value={customTrackLeadInput}
+                        onChange={(e) => setCustomTrackLeadInput(e.target.value)}
+                        placeholder="Type PIC name..."
+                        className="bg-slate-800 text-white text-xs font-semibold border border-slate-600 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-[#00C4E7] w-36"
+                        autoFocus
+                      />
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const finalValue = isCustomTrackLead ? customTrackLeadInput.trim() : editingTrackLeadValue.trim();
+                        if (finalValue) {
+                          setTrackLeads((prev) => ({ ...prev, [track.id]: finalValue }));
+                          if (onSaveAndCommit) onSaveAndCommit();
+                        }
+                        setEditingTrackLeadId(null);
+                        setIsCustomTrackLead(false);
+                      }}
+                      className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs transition cursor-pointer"
+                      title="Save PIC"
+                    >
+                      <i className="fa-solid fa-check"></i>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingTrackLeadId(null);
+                        setIsCustomTrackLead(false);
+                      }}
+                      className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded font-bold text-xs transition cursor-pointer"
+                      title="Cancel"
+                    >
+                      <i className="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    <span>PIC:</span>
+                    <strong className="text-slate-200">{trackLeads[track.id] || track.lead}</strong>
+                    <button
+                      type="button"
+                      disabled={!isEditMode}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isEditMode) return;
+                        setEditingTrackLeadId(track.id);
+                        setEditingTrackLeadValue(trackLeads[track.id] || track.lead);
+                        setCustomTrackLeadInput('');
+                        setIsCustomTrackLead(false);
+                      }}
+                      className={`p-1 transition ${
+                        isEditMode
+                          ? 'text-slate-400 hover:text-blue-300 cursor-pointer'
+                          : 'text-slate-600 cursor-not-allowed'
+                      }`}
+                      title={isEditMode ? 'Edit Track PIC' : 'Activate Edit Mode in header to edit'}
+                    >
+                      <i className={`fa-solid ${isEditMode ? 'fa-pen-to-square' : 'fa-lock'} text-[10px]`}></i>
+                    </button>
+                  </span>
+                )}
                 <span className="text-[#00C4E7] group-hover:translate-x-1 transition-transform flex items-center gap-1 font-bold">
                   View Timeline <i className="fa-solid fa-arrow-right text-[10px]"></i>
                 </span>
@@ -1044,34 +1146,128 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                           </span>
 
                                           {task.stakeholders && task.stakeholders.length > 0 ? (
-                                            task.stakeholders.map((person) => (
-                                              <span
-                                                key={person}
-                                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-[#003366] text-[11px] font-bold border border-blue-200/80 shadow-2xs"
-                                              >
-                                                <span>{person}</span>
-                                                {isEditMode && (
-                                                  <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      const updated = (task.stakeholders || []).filter(
-                                                        (s) => s !== person
-                                                      );
-                                                      updateTaskStakeholders(
-                                                        phase.id,
-                                                        task.id,
-                                                        updated
-                                                      );
-                                                    }}
-                                                    className="hover:text-red-600 transition-colors ml-0.5 cursor-pointer"
-                                                    title="Remove PIC"
+                                            task.stakeholders.map((person, personIdx) => {
+                                              const picKey = `${phase.id}-${task.id}-${personIdx}`;
+                                              const isEditingThisPic = editingTaskPicKey === picKey;
+
+                                              if (isEditingThisPic) {
+                                                return (
+                                                  <div
+                                                    key={`edit-pic-${personIdx}`}
+                                                    className="inline-flex items-center gap-1 bg-white border border-[#007BFF] rounded-lg p-1 shadow-md z-20"
+                                                    onClick={(e) => e.stopPropagation()}
                                                   >
-                                                    <i className="fa-solid fa-xmark text-[10px]"></i>
-                                                  </button>
-                                                )}
-                                              </span>
-                                            ))
+                                                    <select
+                                                      value={isCustomTaskPicInput ? '__custom__' : editingTaskPicValue}
+                                                      onChange={(e) => {
+                                                        if (e.target.value === '__custom__') {
+                                                          setIsCustomTaskPicInput(true);
+                                                        } else {
+                                                          setIsCustomTaskPicInput(false);
+                                                          setEditingTaskPicValue(e.target.value);
+                                                        }
+                                                      }}
+                                                      className="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-[#007BFF]"
+                                                    >
+                                                      <option value="">Select replacement PIC...</option>
+                                                      <optgroup label="Master Data Directory">
+                                                        {picOptions.map((item) => (
+                                                          <option key={item.fullName} value={item.fullName}>
+                                                            {item.fullName}{item.position ? ` — ${item.position}` : ''}
+                                                          </option>
+                                                        ))}
+                                                      </optgroup>
+                                                      <option value="__custom__">+ Custom Name...</option>
+                                                    </select>
+
+                                                    {isCustomTaskPicInput && (
+                                                      <input
+                                                        type="text"
+                                                        value={customTaskPicInput}
+                                                        onChange={(e) => setCustomTaskPicInput(e.target.value)}
+                                                        placeholder="PIC Name"
+                                                        className="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-[#007BFF] w-28"
+                                                        autoFocus
+                                                      />
+                                                    )}
+
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => {
+                                                        const newVal = isCustomTaskPicInput ? customTaskPicInput.trim() : editingTaskPicValue.trim();
+                                                        if (newVal) {
+                                                          const updated = [...(task.stakeholders || [])];
+                                                          updated[personIdx] = newVal;
+                                                          updateTaskStakeholders(phase.id, task.id, updated);
+                                                        }
+                                                        setEditingTaskPicKey(null);
+                                                        setIsCustomTaskPicInput(false);
+                                                      }}
+                                                      className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold cursor-pointer"
+                                                      title="Save PIC"
+                                                    >
+                                                      <i className="fa-solid fa-check"></i>
+                                                    </button>
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => {
+                                                        setEditingTaskPicKey(null);
+                                                        setIsCustomTaskPicInput(false);
+                                                      }}
+                                                      className="px-1.5 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-bold cursor-pointer"
+                                                      title="Cancel"
+                                                    >
+                                                      <i className="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                  </div>
+                                                );
+                                              }
+
+                                              return (
+                                                <span
+                                                  key={person}
+                                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-[#003366] text-[11px] font-bold border border-blue-200/80 shadow-2xs"
+                                                >
+                                                  <span>{person}</span>
+                                                  {isEditMode && (
+                                                    <div className="inline-flex items-center gap-1 ml-0.5">
+                                                      <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          setEditingTaskPicKey(picKey);
+                                                          setEditingTaskPicValue(person);
+                                                          setCustomTaskPicInput('');
+                                                          setIsCustomTaskPicInput(false);
+                                                        }}
+                                                        className="text-slate-400 hover:text-[#007BFF] transition-colors cursor-pointer"
+                                                        title="Edit / Change PIC"
+                                                      >
+                                                        <i className="fa-solid fa-pen text-[9px]"></i>
+                                                      </button>
+                                                      <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          const updated = (task.stakeholders || []).filter(
+                                                            (_, idx) => idx !== personIdx
+                                                          );
+                                                          updateTaskStakeholders(
+                                                            phase.id,
+                                                            task.id,
+                                                            updated
+                                                          );
+                                                        }}
+                                                        className="text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                                                        title="Remove PIC"
+                                                      >
+                                                        <i className="fa-solid fa-xmark text-[10px]"></i>
+                                                      </button>
+                                                    </div>
+                                                  )}
+                                                </span>
+                                              );
+                                            })
                                           ) : (
                                             <span className="text-xs text-amber-600 font-medium italic">
                                               Unassigned PIC
@@ -1080,58 +1276,113 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                         </div>
 
                                         <div className="flex items-center gap-1.5 self-start sm:self-auto">
-                                          <select
-                                            value=""
-                                            disabled={!isEditMode}
-                                            onChange={(e) => {
-                                              if (!isEditMode || !e.target.value) return;
-                                              const selectedValue = e.target.value;
-                                              if (selectedValue === '__custom__') {
-                                                const customName = prompt(
-                                                  'Enter custom PIC (Person In Charge) name:'
-                                                );
-                                                if (customName && customName.trim()) {
+                                          {addingCustomPicTaskId === task.id ? (
+                                            <div
+                                              className="inline-flex items-center gap-1 bg-white border border-[#007BFF] rounded-lg p-1 shadow-md"
+                                              onClick={(e) => e.stopPropagation()}
+                                            >
+                                              <input
+                                                type="text"
+                                                value={customNewPicInput}
+                                                onChange={(e) => setCustomNewPicInput(e.target.value)}
+                                                placeholder="Enter custom PIC name..."
+                                                className="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-[#007BFF] w-36"
+                                                autoFocus
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Enter') {
+                                                    if (customNewPicInput.trim()) {
+                                                      const current = task.stakeholders || [];
+                                                      if (!current.includes(customNewPicInput.trim())) {
+                                                        updateTaskStakeholders(phase.id, task.id, [
+                                                          ...current,
+                                                          customNewPicInput.trim(),
+                                                        ]);
+                                                      }
+                                                    }
+                                                    setAddingCustomPicTaskId(null);
+                                                    setCustomNewPicInput('');
+                                                  } else if (e.key === 'Escape') {
+                                                    setAddingCustomPicTaskId(null);
+                                                    setCustomNewPicInput('');
+                                                  }
+                                                }}
+                                              />
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  if (customNewPicInput.trim()) {
+                                                    const current = task.stakeholders || [];
+                                                    if (!current.includes(customNewPicInput.trim())) {
+                                                      updateTaskStakeholders(phase.id, task.id, [
+                                                        ...current,
+                                                        customNewPicInput.trim(),
+                                                      ]);
+                                                    }
+                                                  }
+                                                  setAddingCustomPicTaskId(null);
+                                                  setCustomNewPicInput('');
+                                                }}
+                                                className="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition shadow-2xs cursor-pointer"
+                                                title="Add PIC"
+                                              >
+                                                <i className="fa-solid fa-check"></i>
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  setAddingCustomPicTaskId(null);
+                                                  setCustomNewPicInput('');
+                                                }}
+                                                className="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded text-xs font-bold transition cursor-pointer"
+                                                title="Cancel"
+                                              >
+                                                <i className="fa-solid fa-xmark"></i>
+                                              </button>
+                                            </div>
+                                          ) : (
+                                            <select
+                                              value=""
+                                              disabled={!isEditMode}
+                                              onChange={(e) => {
+                                                if (!isEditMode || !e.target.value) return;
+                                                const selectedValue = e.target.value;
+                                                if (selectedValue === '__custom__') {
+                                                  setAddingCustomPicTaskId(task.id);
+                                                  setCustomNewPicInput('');
+                                                } else {
                                                   const current = task.stakeholders || [];
-                                                  if (!current.includes(customName.trim())) {
+                                                  if (!current.includes(selectedValue)) {
                                                     updateTaskStakeholders(phase.id, task.id, [
                                                       ...current,
-                                                      customName.trim(),
+                                                      selectedValue,
                                                     ]);
                                                   }
                                                 }
-                                              } else {
-                                                const current = task.stakeholders || [];
-                                                if (!current.includes(selectedValue)) {
-                                                  updateTaskStakeholders(phase.id, task.id, [
-                                                    ...current,
-                                                    selectedValue,
-                                                  ]);
-                                                }
-                                              }
-                                            }}
-                                            className={`border rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#007BFF] shadow-2xs ${
-                                              isEditMode
-                                                ? 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 cursor-pointer'
-                                                : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                                            }`}
-                                          >
-                                            <option value="">{isEditMode ? '+ Assign/Change PIC...' : 'PIC Locked'}</option>
-                                            <optgroup label="Standard PIC Options">
-                                              {STANDARD_PIC_OPTIONS.map((pic) => (
-                                                <option
-                                                  key={pic}
-                                                  value={pic}
-                                                  disabled={task.stakeholders?.includes(pic)}
-                                                >
-                                                  {pic}{' '}
-                                                  {task.stakeholders?.includes(pic)
-                                                    ? '(Assigned)'
-                                                    : ''}
-                                                </option>
-                                              ))}
-                                            </optgroup>
-                                            <option value="__custom__">+ Add Custom PIC...</option>
-                                          </select>
+                                              }}
+                                              className={`border rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#007BFF] shadow-2xs ${
+                                                isEditMode
+                                                  ? 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 cursor-pointer'
+                                                  : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                                              }`}
+                                            >
+                                              <option value="">{isEditMode ? '+ Assign/Change PIC...' : 'PIC Locked'}</option>
+                                              <optgroup label="Master Data PICs Directory">
+                                                {picOptions.map((item) => (
+                                                  <option
+                                                    key={item.fullName}
+                                                    value={item.fullName}
+                                                    disabled={task.stakeholders?.includes(item.fullName)}
+                                                  >
+                                                    {item.fullName}{item.position ? ` — ${item.position}` : ''}{' '}
+                                                    {task.stakeholders?.includes(item.fullName)
+                                                      ? '(Assigned)'
+                                                      : ''}
+                                                  </option>
+                                                ))}
+                                              </optgroup>
+                                              <option value="__custom__">+ Add Custom PIC...</option>
+                                            </select>
+                                          )}
                                         </div>
                                       </div>
                                     </div>

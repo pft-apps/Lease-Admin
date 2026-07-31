@@ -1,3 +1,9 @@
+export interface MasterPIC {
+  id: string;
+  fullName: string;
+  position: string;
+}
+
 export interface AuditGate {
   id: string;
   gateNumber: number;

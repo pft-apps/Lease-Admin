@@ -253,6 +253,82 @@ export default function App() {
     }
   }
 
+  const handleUpdateStartDate = async (newDate: string) => {
+    setStartDate(newDate);
+    const updatedState: AppStorageState = {
+      version: '2.5',
+      lastSaved: new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+      startDate: newDate,
+      totalWorkingDays,
+      gates,
+      questions,
+      riskPoints,
+      combinedData,
+      officeData,
+      retailData,
+      pillars,
+      masterPics,
+      trackLeads,
+    };
+    await saveStateToIndexedDB(updatedState);
+    showToast(`Assessment Window Start Date updated to ${newDate} and saved!`);
+
+    // Post background save to Power Automate
+    try {
+      await fetch(POWER_AUTOMATE_SAVE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedState),
+      });
+    } catch (e) {
+      console.warn("Save webhook error", e);
+    } finally {
+      await fetchLatestData();
+    }
+  };
+
+  const handleUpdateTotalWorkingDays = async (newDays: number) => {
+    setTotalWorkingDays(newDays);
+    const updatedState: AppStorageState = {
+      version: '2.5',
+      lastSaved: new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+      startDate,
+      totalWorkingDays: newDays,
+      gates,
+      questions,
+      riskPoints,
+      combinedData,
+      officeData,
+      retailData,
+      pillars,
+      masterPics,
+      trackLeads,
+    };
+    await saveStateToIndexedDB(updatedState);
+    showToast(`Assessment Window Duration updated to ${newDays} Working Days and saved!`);
+
+    // Post background save to Power Automate
+    try {
+      await fetch(POWER_AUTOMATE_SAVE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedState),
+      });
+    } catch (e) {
+      console.warn("Save webhook error", e);
+    } finally {
+      await fetchLatestData();
+    }
+  };
+
   // Load initial state on startup, on tab focus, and automatically every 15 minutes
   useEffect(() => {
     // 1. Initial load / open trigger
@@ -280,7 +356,7 @@ export default function App() {
   }, []);
 
   // Save & Commit State to IndexedDB & Power Automate Save Webhook
-  const handleSaveAndCommit = async () => {
+  const handleSaveAndCommit = async (overrideState?: Partial<AppStorageState>) => {
     setSyncStatus('saving');
     const stateToSave: AppStorageState = {
       version: '2.5',
@@ -300,6 +376,7 @@ export default function App() {
       pillars,
       masterPics,
       trackLeads,
+      ...overrideState,
     };
 
     // 1. Save to local IndexedDB cache first
@@ -351,6 +428,9 @@ export default function App() {
       console.error("Failed to save data via Power Automate Webhook:", error);
       setSyncStatus('local');
       showToast("Data saved to local IndexedDB cache (Power Automate save failed).");
+    } finally {
+      // Always run the Data Pulling Logic after every run of the Data Saving Logic
+      await fetchLatestData();
     }
   };
 
@@ -601,21 +681,21 @@ export default function App() {
   };
 
   const handleSaveGate = (updatedGate: AuditGate) => {
-    setGates((prev) =>
-      prev.map((g) => (g.id === updatedGate.id ? updatedGate : g))
-    );
+    const updatedGates = gates.map((g) => (g.id === updatedGate.id ? updatedGate : g));
+    setGates(updatedGates);
+    handleSaveAndCommit({ gates: updatedGates });
   };
 
   const handleSaveQuestion = (updatedQuestion: StrategicQuestion) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
-    );
+    const updatedQuestions = questions.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q));
+    setQuestions(updatedQuestions);
+    handleSaveAndCommit({ questions: updatedQuestions });
   };
 
   const handleSaveRiskPoint = (updatedRiskPoint: RiskPoint) => {
-    setRiskPoints((prev) =>
-      prev.map((r) => (r.id === updatedRiskPoint.id ? updatedRiskPoint : r))
-    );
+    const updatedRiskPoints = riskPoints.map((r) => (r.id === updatedRiskPoint.id ? updatedRiskPoint : r));
+    setRiskPoints(updatedRiskPoints);
+    handleSaveAndCommit({ riskPoints: updatedRiskPoints });
   };
 
   return (
@@ -646,9 +726,10 @@ export default function App() {
       {/* Main Content Sections */}
       <HeroHeader
         startDate={startDate}
-        onUpdateStartDate={setStartDate}
+        onUpdateStartDate={handleUpdateStartDate}
         totalWorkingDays={totalWorkingDays}
-        onUpdateTotalWorkingDays={setTotalWorkingDays}
+        onUpdateTotalWorkingDays={handleUpdateTotalWorkingDays}
+        onSaveAndCommit={handleSaveAndCommit}
         isEditMode={isEditMode}
       />
 
@@ -693,11 +774,14 @@ export default function App() {
               setOfficeData={setOfficeData}
               retailData={retailData}
               setRetailData={setRetailData}
+              masterPics={masterPics}
+              trackLeads={trackLeads}
+              setTrackLeads={setTrackLeads}
               onOpenRoadmapReport={() => setIsRoadmapReportModalOpen(true)}
               startDate={startDate}
-              onUpdateStartDate={setStartDate}
+              onUpdateStartDate={handleUpdateStartDate}
               totalWorkingDays={totalWorkingDays}
-              onUpdateTotalWorkingDays={setTotalWorkingDays}
+              onUpdateTotalWorkingDays={handleUpdateTotalWorkingDays}
               onSaveAndCommit={handleSaveAndCommit}
               isEditMode={isEditMode}
             />
