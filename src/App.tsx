@@ -183,6 +183,14 @@ export default function App() {
   };
 
   const fetchLatestData = async (isManual = false): Promise<boolean> => {
+    // a. Load cached data from IndexedDB immediately so the UI opens fast
+    const cachedData = await loadStateFromIndexedDB();
+    if (cachedData) {
+      applyDataToState(cachedData);
+      setSyncStatus('synced');
+    }
+
+    // b. Perform background fetch to SHAREPOINT_FILE_URL
     try {
       const response = await fetch(SHAREPOINT_FILE_URL, {
         method: "GET",
@@ -209,38 +217,37 @@ export default function App() {
         freshData = typeof freshData.d === 'string' ? JSON.parse(freshData.d) : freshData.d;
       }
 
-      // Update local state and save to IndexedDB
+      // c. Update local app state and save fresh copy into IndexedDB
       applyDataToState(freshData);
       await saveStateToIndexedDB(freshData);
       setSyncStatus('synced');
       setLinkedFileName('Horizon_Lease_Admin_Migration_Data.json (SharePoint)');
+      if (isManual) {
+        showToast('Successfully pulled latest data from SharePoint!');
+      }
       return true;
     } catch (error) {
-      console.warn("SharePoint pull status (expected if CORS/unauthenticated in preview iframe):", error);
+      // d. If fetch fails, keep cached data active and log/notify cleanly
+      console.warn("SharePoint background fetch status (CORS/unauthenticated in preview iframe):", error);
 
-      // Fallback to IndexedDB if network fetch fails
-      const cachedData = await loadStateFromIndexedDB();
       if (cachedData) {
-        applyDataToState(cachedData);
-        setSyncStatus('synced');
-        showToast('Loaded cached data from IndexedDB local storage.');
+        if (isManual) {
+          showToast('Using cached data. Unable to reach SharePoint directly in this browser context.');
+        }
       } else {
         setSyncStatus('local');
         if (isManual) {
-          alert("Unable to load data. Please check your SharePoint connection or M365 login status.");
+          alert("Unable to load data from SharePoint. Please check your connection or M365 login status.");
         }
       }
       return false;
     }
   };
 
-  // Load initial state from SharePoint REST API with IndexedDB fallback
+  // Load initial state from IndexedDB & SharePoint REST API
   useEffect(() => {
     const initStorage = async () => {
-      const success = await fetchLatestData(false);
-      if (success) {
-        showToast('Loaded JSON data from SharePoint REST API!');
-      }
+      await fetchLatestData(false);
     };
 
     initStorage();
@@ -249,10 +256,7 @@ export default function App() {
   const handleFetchSharePointManual = async () => {
     setSyncStatus('saving');
     showToast('Pulling latest data from SharePoint...');
-    const success = await fetchLatestData(true);
-    if (success) {
-      showToast('Successfully pulled & synced latest data from SharePoint Document Library!');
-    }
+    await fetchLatestData(true);
   };
 
   // Save & Commit State to Local Storage & File Export for SharePoint
@@ -293,8 +297,8 @@ export default function App() {
     a.click();
     URL.revokeObjectURL(url);
 
-    // c. Display alert & toast message
-    const msg = "Data exported! Please drag and drop the downloaded data.json file into your SharePoint Document Library to overwrite the old file and publish live.";
+    // c. Display toast and alert message
+    const msg = "Changes saved locally and exported! Please drag and drop the downloaded data.json file into your FBSC-Finance SharePoint folder to update all live users.";
     showToast(msg);
     alert(msg);
   };
