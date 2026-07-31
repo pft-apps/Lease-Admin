@@ -118,7 +118,7 @@ export const SectionTabBar: React.FC<SectionTabBarProps> = ({
               title={tab.description}
               className={`flex items-center justify-center gap-1.5 px-2 py-2 sm:py-2.5 rounded-xl text-[11px] xl:text-xs font-extrabold transition-all cursor-pointer border select-none relative w-full ${
                 isActive
-                  ? 'bg-[#00C4E7] text-[#06234D] border-[#00C4E7] shadow-lg z-20 font-black'
+                  ? 'bg-white text-[#06234D] border-white shadow-xl z-20 font-black ring-2 ring-white/50'
                   : 'bg-[#001D45] hover:bg-[#002D68] text-slate-200 hover:text-white border-[#00C4E7]/25 hover:border-[#00C4E7]/50 z-0'
               }`}
             >
@@ -128,7 +128,7 @@ export const SectionTabBar: React.FC<SectionTabBarProps> = ({
                 <span
                   className={`hidden xl:inline-block text-[9px] px-1.5 py-0.2 rounded-full font-black tracking-tighter shrink-0 ${
                     isActive
-                      ? 'bg-[#06234D] text-[#00C4E7]'
+                      ? 'bg-[#06234D] text-white border border-[#06234D]'
                       : 'bg-[#003886] text-slate-200 border border-[#00C4E7]/30'
                   }`}
                 >

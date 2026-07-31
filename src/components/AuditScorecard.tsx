@@ -101,7 +101,7 @@ export const AuditScorecard: React.FC<AuditScorecardProps> = ({
             {onSaveAndCommit && (
               <button
                 type="button"
-                onClick={onSaveAndCommit}
+                onClick={() => onSaveAndCommit({ gates })}
                 disabled={!isEditMode}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
                   isEditMode

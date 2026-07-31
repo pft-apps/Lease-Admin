@@ -343,7 +343,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
           {onSaveAndCommit && (
             <button
               type="button"
-              onClick={onSaveAndCommit}
+              onClick={() => onSaveAndCommit({ combinedData, officeData, retailData, trackLeads })}
               disabled={!isEditMode}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm ${
                 isEditMode

@@ -372,8 +372,18 @@ export default function App() {
   }, []);
 
   // Save & Commit State to IndexedDB & Power Automate Save Webhook
-  const handleSaveAndCommit = async (overrideState?: Partial<AppStorageState>) => {
+  const handleSaveAndCommit = async (overrideState?: Partial<AppStorageState> | any) => {
     setSyncStatus('saving');
+
+    const cleanOverride =
+      overrideState &&
+      typeof overrideState === 'object' &&
+      !('nativeEvent' in overrideState) &&
+      !('target' in overrideState) &&
+      !('_reactName' in overrideState)
+        ? overrideState
+        : {};
+
     const stateToSave: AppStorageState = {
       version: '2.5',
       lastSaved: new Date().toLocaleTimeString('en-US', {
@@ -392,7 +402,7 @@ export default function App() {
       pillars,
       masterPics,
       trackLeads,
-      ...overrideState,
+      ...cleanOverride,
     };
 
     // 1. Save to local IndexedDB cache first
