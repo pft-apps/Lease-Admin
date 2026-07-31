@@ -193,25 +193,37 @@ export default function App() {
 
     // Step B: Fetch fresh payload from Power Automate Read Flow in background
     try {
-      let response = await fetch(POWER_AUTOMATE_READ_URL, {
-        method: "GET",
-        headers: { "Accept": "application/json" }
-      });
-
-      // Fallback to POST if GET is not allowed or returns an error status (e.g. 405 Method Not Allowed)
-      if (!response.ok) {
-        console.warn(`GET read webhook returned status ${response.status}, attempting POST fallback...`);
+      let response: Response | null = null;
+      try {
         response = await fetch(POWER_AUTOMATE_READ_URL, {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({})
+          method: "GET",
+          headers: { "Accept": "application/json" }
         });
+      } catch (getErr) {
+        console.warn("GET request to Power Automate read webhook failed, trying POST fallback...", getErr);
       }
 
-      if (!response.ok) throw new Error(`Read webhook returned error status: ${response.status}`);
+      // Fallback to POST if GET is not allowed or returns an error status (e.g. 405 Method Not Allowed)
+      if (!response || !response.ok) {
+        try {
+          response = await fetch(POWER_AUTOMATE_READ_URL, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({})
+          });
+        } catch (postErr) {
+          console.warn("POST request to Power Automate read webhook failed:", postErr);
+        }
+      }
+
+      if (!response || !response.ok) {
+        console.warn(`Read webhook unavailable or returned error status: ${response ? response.status : 'No response'}`);
+        setSyncStatus('local');
+        return;
+      }
 
       const rawData = await response.json();
       
@@ -247,7 +259,7 @@ export default function App() {
         setSyncStatus('local');
       }
     } catch (error) {
-      console.error("Background data fetch failed:", error);
+      console.warn("Background data fetch notice (using local IndexedDB cache):", error);
       setSyncStatus('local');
       // App gracefully keeps using cached IndexedDB data
     }
@@ -287,6 +299,8 @@ export default function App() {
     } catch (e) {
       console.warn("Save webhook error", e);
     } finally {
+      // 10-second delay before pulling fresh data to allow backend processing to complete
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       await fetchLatestData();
     }
   };
@@ -325,6 +339,8 @@ export default function App() {
     } catch (e) {
       console.warn("Save webhook error", e);
     } finally {
+      // 10-second delay before pulling fresh data to allow backend processing to complete
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       await fetchLatestData();
     }
   };
@@ -425,11 +441,12 @@ export default function App() {
       showToast(alertMsg);
       alert(alertMsg);
     } catch (error) {
-      console.error("Failed to save data via Power Automate Webhook:", error);
+      console.warn("Save webhook fetch notice (data safely saved to local IndexedDB):", error);
       setSyncStatus('local');
-      showToast("Data saved to local IndexedDB cache (Power Automate save failed).");
+      showToast("Data saved to local IndexedDB cache.");
     } finally {
-      // Always run the Data Pulling Logic after every run of the Data Saving Logic
+      // Always run the Data Pulling Logic after a 10-second delay following Data Saving Logic
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       await fetchLatestData();
     }
   };
