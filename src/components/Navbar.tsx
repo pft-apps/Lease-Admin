@@ -56,14 +56,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Action Items */}
 
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Sync / Pull Data Button (GET from SharePoint REST API) */}
+          {/* Refresh Data Button (GET from SharePoint REST API) */}
           <button
             onClick={onSync}
             className="flex items-center gap-1.5 px-3 py-2 bg-[#003886] hover:bg-[#002866] active:scale-95 text-white rounded-xl text-xs font-semibold shadow-md transition-all cursor-pointer border border-[#00C4E7]/30"
-            title="Pull and sync latest data from storage"
+            title="Refresh and pull latest data from SharePoint"
           >
-            <i className="fa-solid fa-arrows-rotate text-xs"></i>
-            <span className="hidden md:inline">Pull Storage</span>
+            <i className={`fa-solid fa-arrows-rotate text-xs ${syncStatus === 'saving' ? 'animate-spin' : ''}`}></i>
+            <span className="hidden sm:inline">Refresh Data</span>
+            <span className="sm:hidden">Refresh</span>
           </button>
 
           {/* Live Gate Status Pill */}

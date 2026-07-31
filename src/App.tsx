@@ -163,46 +163,44 @@ export default function App() {
     };
   }, []);
 
-  // Power Automate Webhook URL for SharePoint Sync
-  const POWER_AUTOMATE_WEBHOOK_URL = "https://defaultcdb710b6704140938e6f80ac01d6c6.5a.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/20/workflows/b1f010f2869d4550801a1332e0639966/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sKHPYutK9tUmIPyhTxmkCLFhPZ9CbZwQp220pIZunEk";
-
   // SharePoint REST API Configuration
   const SHAREPOINT_SITE_URL = "https://filinvest.sharepoint.com/sites/FBSC-Finance";
   const SHAREPOINT_FILE_RELATIVE_URL = "/sites/FBSC-Finance/Shared Documents/Horizon_Lease_Admin_Migration_Data.json";
-  const SHAREPOINT_REST_API_URL = `${SHAREPOINT_SITE_URL}/_api/web/GetFileByServerRelativeUrl('${SHAREPOINT_FILE_RELATIVE_URL}')/$value`;
+  const sharePointUrl = `${SHAREPOINT_SITE_URL}/_api/web/GetFileByServerRelativeUrl('${SHAREPOINT_FILE_RELATIVE_URL}')/$value`;
 
   const fetchSharePointData = async (): Promise<AppStorageState | null> => {
     try {
-      const response = await fetch(SHAREPOINT_REST_API_URL, {
-        method: 'GET',
+      const response = await fetch(sharePointUrl, {
+        method: "GET",
         headers: {
-          'Accept': 'application/json;odata=verbose',
+          "Accept": "application/json;odata=verbose",
+          "Cache-Control": "no-cache"
         },
+        credentials: "include"
       });
 
       if (!response.ok) {
-        console.warn(`SharePoint REST API fetch HTTP error status: ${response.status} ${response.statusText}`);
-        return null;
+        throw new Error(`HTTP error status: ${response.status}`);
       }
 
       const text = await response.text();
       if (!text || !text.trim()) return null;
 
-      let parsed: any;
+      let freshData: any;
       try {
-        parsed = JSON.parse(text);
+        freshData = JSON.parse(text);
       } catch (e) {
         console.warn("Failed to parse SharePoint REST response as JSON:", e);
         return null;
       }
 
-      if (parsed && parsed.d) {
-        parsed = typeof parsed.d === 'string' ? JSON.parse(parsed.d) : parsed.d;
+      if (freshData && freshData.d) {
+        freshData = typeof freshData.d === 'string' ? JSON.parse(freshData.d) : freshData.d;
       }
 
-      return parsed;
-    } catch (err) {
-      console.warn("SharePoint REST API fetch unavailable or CORS restricted outside SharePoint environment:", err);
+      return freshData;
+    } catch (error) {
+      console.warn("SharePoint REST API fetch unavailable or CORS restricted in preview environment:", error);
       return null;
     }
   };
@@ -267,7 +265,7 @@ export default function App() {
 
   const handleFetchSharePointManual = async () => {
     setSyncStatus('saving');
-    showToast('Pulling latest data from storage...');
+    showToast('Pulling latest data from SharePoint...');
     const spData = await fetchSharePointData();
     if (spData) {
       if (spData.startDate) setStartDate(spData.startDate);
@@ -304,15 +302,16 @@ export default function App() {
         if (dbState.lastSaved) setLastSavedTime(dbState.lastSaved);
 
         setSyncStatus('synced');
-        showToast('Pulled & synced latest data from local storage!');
+        showToast('Loaded data from local storage.');
       } else {
         setSyncStatus('local');
-        showToast('SharePoint REST API request failed and no local stored data found.');
+        showToast('Unable to fetch latest data from SharePoint.');
       }
+      alert('Unable to fetch latest data. Please ensure you are logged into SharePoint/M365 in this browser tab.');
     }
   };
 
-  // Save & Commit State to Power Automate Webhook & IndexedDB
+  // Save & Commit State to Local Storage & File Export for SharePoint
   const handleSaveAndCommit = async (overrideState?: Partial<AppStorageState>) => {
     setSyncStatus('saving');
     const updatedData: AppStorageState = {
@@ -336,35 +335,24 @@ export default function App() {
       ...overrideState,
     };
 
-    // 1. Save state to local IndexedDB database
+    // a. Update local app state in memory & IndexedDB
     await saveStateToIndexedDB(updatedData);
+    setLastSavedTime(updatedData.lastSaved);
+    setSyncStatus('synced');
 
-    // 2. Send HTTP POST request to Power Automate Webhook
-    fetch(POWER_AUTOMATE_WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(updatedData)
-    })
-      .then(response => {
-        if (response.ok) {
-          setSyncStatus('synced');
-          setLastSavedTime(updatedData.lastSaved);
-          showToast("Data successfully saved and updated on SharePoint!");
-          alert("Data successfully saved and updated on SharePoint!");
-        } else {
-          setSyncStatus('local');
-          showToast("Failed to save data. Please check connection.");
-          alert("Failed to save data. Please check connection.");
-        }
-      })
-      .catch(error => {
-        console.error("Save error:", error);
-        setSyncStatus('local');
-        showToast("Error communicating with update service.");
-        alert("Error communicating with update service.");
-      });
+    // b. Automatically generate and trigger browser file download of updatedData named data.json
+    const blob = new Blob([JSON.stringify(updatedData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "data.json";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // c. Display alert & toast message
+    const msg = "Data exported! Please drag and drop the downloaded data.json file into your SharePoint Document Library to overwrite the old file and publish live.";
+    showToast(msg);
+    alert(msg);
   };
 
   const triggerFileInput = () => {
