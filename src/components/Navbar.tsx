@@ -9,7 +9,6 @@ interface NavbarProps {
   onOpenReportModal: () => void;
   onOpenRoadmapReportModal?: () => void;
   onOpenSettings: () => void;
-  onSaveAndCommit?: () => void;
   onSync: () => void;
   syncStatus: 'synced' | 'linked' | 'local' | 'saving';
   isLinked: boolean;
@@ -24,7 +23,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenReportModal,
   onOpenRoadmapReportModal,
   onOpenSettings,
-  onSaveAndCommit,
   onSync,
   syncStatus,
   isLinked,
@@ -56,15 +54,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Action Items */}
 
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Refresh Data Button (GET from SharePoint REST API) */}
+          {/* Refresh Data / Pull Webhook Button */}
           <button
             onClick={onSync}
-            className="flex items-center gap-1.5 px-3 py-2 bg-[#003886] hover:bg-[#002866] active:scale-95 text-white rounded-xl text-xs font-semibold shadow-md transition-all cursor-pointer border border-[#00C4E7]/30"
-            title="Refresh and pull latest data from SharePoint"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 active:scale-95 text-white rounded-xl text-xs font-extrabold shadow-md transition-all cursor-pointer ring-2 ring-sky-400/30"
+            title="Refresh Data from Power Automate HTTP Webhook"
           >
             <i className={`fa-solid fa-arrows-rotate text-xs ${syncStatus === 'saving' ? 'animate-spin' : ''}`}></i>
             <span className="hidden sm:inline">Refresh Data</span>
             <span className="sm:hidden">Refresh</span>
+            <span className="text-[10px] bg-black/25 px-1.5 py-0.5 rounded font-black">
+              Webhook
+            </span>
           </button>
 
           {/* Live Gate Status Pill */}

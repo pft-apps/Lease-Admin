@@ -6,7 +6,6 @@ interface HeroHeaderProps {
   onUpdateStartDate: (newDate: string) => void;
   totalWorkingDays?: number;
   onUpdateTotalWorkingDays?: (days: number) => void;
-  onSaveAndCommit?: (override?: any) => void;
   isEditMode?: boolean;
 }
 
@@ -15,7 +14,6 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
   onUpdateStartDate,
   totalWorkingDays = 30,
   onUpdateTotalWorkingDays,
-  onSaveAndCommit,
   isEditMode = true,
 }) => {
   const [isEditingWindow, setIsEditingWindow] = useState(false);
@@ -35,12 +33,6 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
       onUpdateTotalWorkingDays(tempWorkingDays);
     }
     setIsEditingWindow(false);
-    if (onSaveAndCommit) {
-      onSaveAndCommit({
-        startDate: tempStartDate || startDate,
-        totalWorkingDays: tempWorkingDays || totalWorkingDays,
-      });
-    }
   };
 
   return (

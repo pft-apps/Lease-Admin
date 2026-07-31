@@ -201,18 +201,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-[#003886]/5 border border-[#003886]/20 rounded-2xl space-y-2">
                   <div className="font-bold text-[#003886] flex items-center gap-1.5">
-                    <i className="fa-solid fa-cloud shadow-sm text-[#007BFF]"></i>
-                    <span>SharePoint REST Sync</span>
+                    <i className="fa-solid fa-[#00C4E7] fa-cloud shadow-sm text-[#007BFF]"></i>
+                    <span>Power Automate Sync</span>
                   </div>
                   <p className="text-slate-500 text-[11px]">
-                    Fetch latest state from SharePoint Document Library REST API.
+                    Fetch fresh payload from Power Automate Read Webhook and update cache.
                   </p>
                   <button
                     onClick={onFetchSharePoint}
                     className="w-full mt-2 py-2 bg-[#003886] hover:bg-[#06234D] text-white font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <i className="fa-solid fa-arrows-rotate"></i>
-                    <span>Sync from SharePoint</span>
+                    <span>Refresh Data</span>
                   </button>
                 </div>
 

@@ -163,106 +163,105 @@ export default function App() {
     };
   }, []);
 
-  // SharePoint REST API Configuration (Direct Unique ID Endpoint)
-  const SHAREPOINT_FILE_URL = "https://filinvest.sharepoint.com/sites/FBSC-Finance/_api/web/GetFileByUniqueId('3c7f0dfa-115f-4a2b-a218-242b1ad74260')/$value";
+  // Power Automate HTTP Webhooks Configuration
+  const POWER_AUTOMATE_READ_URL = "https://defaultcdb710b6704140938e6f80ac01d6c6.5a.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/10/workflows/0455504f0a4b407981a62197b0fce827/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=VWyfTVQwBD5eYrCjXrvyVK8gneYkp0LGKY6vkEEQeCY";
+  const POWER_AUTOMATE_SAVE_URL = "https://defaultcdb710b6704140938e6f80ac01d6c6.5a.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/12/workflows/653d135a1c5147a39ace756caa77d6af/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ITb4fk47jSNinEScwKMn3Pb4x-XGwBp3YZm0kKPF07s";
 
-  const applyDataToState = (freshData: any) => {
-    if (!freshData) return;
-    if (freshData.startDate) setStartDate(freshData.startDate);
-    if (freshData.totalWorkingDays) setTotalWorkingDays(freshData.totalWorkingDays);
-    if (freshData.gates && Array.isArray(freshData.gates)) setGates(freshData.gates);
-    if (freshData.questions && Array.isArray(freshData.questions)) setQuestions(freshData.questions);
-    if (freshData.riskPoints && Array.isArray(freshData.riskPoints)) setRiskPoints(freshData.riskPoints);
-    if (freshData.combinedData && Array.isArray(freshData.combinedData)) setCombinedData(freshData.combinedData);
-    if (freshData.officeData && Array.isArray(freshData.officeData)) setOfficeData(freshData.officeData);
-    if (freshData.retailData && Array.isArray(freshData.retailData)) setRetailData(freshData.retailData);
-    if (freshData.pillars && Array.isArray(freshData.pillars)) setPillars(freshData.pillars);
-    if (freshData.masterPics && Array.isArray(freshData.masterPics)) setMasterPics(freshData.masterPics);
-    if (freshData.trackLeads) setTrackLeads(freshData.trackLeads);
-    if (freshData.lastSaved) setLastSavedTime(freshData.lastSaved);
+  const updateAppState = (data: Partial<AppStorageState>) => {
+    if (!data) return;
+    if (data.startDate) setStartDate(data.startDate);
+    if (data.totalWorkingDays) setTotalWorkingDays(data.totalWorkingDays);
+    if (data.gates && Array.isArray(data.gates)) setGates(data.gates);
+    if (data.questions && Array.isArray(data.questions)) setQuestions(data.questions);
+    if (data.riskPoints && Array.isArray(data.riskPoints)) setRiskPoints(data.riskPoints);
+    if (data.combinedData && Array.isArray(data.combinedData)) setCombinedData(data.combinedData);
+    if (data.officeData && Array.isArray(data.officeData)) setOfficeData(data.officeData);
+    if (data.retailData && Array.isArray(data.retailData)) setRetailData(data.retailData);
+    if (data.pillars && Array.isArray(data.pillars)) setPillars(data.pillars);
+    if (data.masterPics && Array.isArray(data.masterPics)) setMasterPics(data.masterPics);
+    if (data.trackLeads) setTrackLeads(data.trackLeads);
+    if (data.lastSaved) setLastSavedTime(data.lastSaved);
   };
 
-  const fetchLatestData = async (isManual = false): Promise<boolean> => {
-    // a. Load cached data from IndexedDB immediately so the UI opens fast
+  async function fetchLatestData() {
+    setSyncStatus('saving');
+    // Step A: Load from IndexedDB local cache first so UI opens instantly
     const cachedData = await loadStateFromIndexedDB();
     if (cachedData) {
-      applyDataToState(cachedData);
-      setSyncStatus('synced');
+      updateAppState(cachedData);
     }
 
-    // b. Perform background fetch to SHAREPOINT_FILE_URL
+    // Step B: Fetch fresh payload from Power Automate Read Flow in background
     try {
-      const response = await fetch(SHAREPOINT_FILE_URL, {
+      let response = await fetch(POWER_AUTOMATE_READ_URL, {
         method: "GET",
-        headers: {
-          "Accept": "application/json"
-        }
+        headers: { "Accept": "application/json" }
       });
 
+      // Fallback to POST if GET is not allowed or returns an error status (e.g. 405 Method Not Allowed)
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        console.warn(`GET read webhook returned status ${response.status}, attempting POST fallback...`);
+        response = await fetch(POWER_AUTOMATE_READ_URL, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({})
+        });
       }
 
-      const text = await response.text();
-      if (!text || !text.trim()) throw new Error("Empty response body");
+      if (!response.ok) throw new Error(`Read webhook returned error status: ${response.status}`);
 
-      let freshData: any;
-      try {
-        freshData = JSON.parse(text);
-      } catch (e) {
-        throw new Error("Invalid JSON format");
+      const rawData = await response.json();
+      
+      // Parse payload considering possible stringified JSON or wrapped body structures from Power Automate
+      let freshData: any = rawData;
+      if (typeof freshData === 'string') {
+        try { freshData = JSON.parse(freshData); } catch (e) { /* ignore */ }
       }
-
-      if (freshData && freshData.d) {
-        freshData = typeof freshData.d === 'string' ? JSON.parse(freshData.d) : freshData.d;
+      if (typeof freshData === 'string') {
+        try { freshData = JSON.parse(freshData); } catch (e) { /* ignore */ }
       }
-
-      // c. Update local app state and save fresh copy into IndexedDB
-      applyDataToState(freshData);
-      await saveStateToIndexedDB(freshData);
-      setSyncStatus('synced');
-      setLinkedFileName('Horizon_Lease_Admin_Migration_Data.json (SharePoint)');
-      if (isManual) {
-        showToast('Successfully pulled latest data from SharePoint!');
-      }
-      return true;
-    } catch (error) {
-      // d. If fetch fails, keep cached data active and log/notify cleanly
-      console.warn("SharePoint background fetch status (CORS/unauthenticated in preview iframe):", error);
-
-      if (cachedData) {
-        if (isManual) {
-          showToast('Using cached data. Unable to reach SharePoint directly in this browser context.');
+      if (freshData && typeof freshData === 'object') {
+        if (freshData.body && typeof freshData.body === 'object') {
+          freshData = freshData.body;
+        } else if (freshData.body && typeof freshData.body === 'string') {
+          try { freshData = JSON.parse(freshData.body); } catch (e) { /* ignore */ }
+        } else if (freshData.d && typeof freshData.d === 'object') {
+          freshData = freshData.d;
+        } else if (freshData.value && typeof freshData.value === 'object' && !Array.isArray(freshData.value)) {
+          freshData = freshData.value;
         }
+      }
+
+      // Save fresh data to IndexedDB and update app state
+      if (freshData && typeof freshData === 'object') {
+        await saveStateToIndexedDB(freshData);
+        updateAppState(freshData);
+        setSyncStatus('synced');
+        setLinkedFileName('Power Automate Webhook (SharePoint)');
+        showToast('Refreshed latest data from Power Automate!');
       } else {
+        console.warn("Read webhook returned empty or non-object payload format");
         setSyncStatus('local');
-        if (isManual) {
-          alert("Unable to load data from SharePoint. Please check your connection or M365 login status.");
-        }
       }
-      return false;
+    } catch (error) {
+      console.error("Background data fetch failed:", error);
+      setSyncStatus('local');
+      // App gracefully keeps using cached IndexedDB data
     }
-  };
+  }
 
-  // Load initial state from IndexedDB & SharePoint REST API
+  // Load initial state on startup
   useEffect(() => {
-    const initStorage = async () => {
-      await fetchLatestData(false);
-    };
-
-    initStorage();
+    fetchLatestData();
   }, []);
 
-  const handleFetchSharePointManual = async () => {
+  // Save & Commit State to IndexedDB & Power Automate Save Webhook
+  const handleSaveAndCommit = async () => {
     setSyncStatus('saving');
-    showToast('Pulling latest data from SharePoint...');
-    await fetchLatestData(true);
-  };
-
-  // Save & Commit State to Local Storage & File Export for SharePoint
-  const handleSaveAndCommit = async (overrideState?: Partial<AppStorageState>) => {
-    setSyncStatus('saving');
-    const updatedData: AppStorageState = {
+    const stateToSave: AppStorageState = {
       version: '2.5',
       lastSaved: new Date().toLocaleTimeString('en-US', {
         hour: '2-digit',
@@ -280,27 +279,58 @@ export default function App() {
       pillars,
       masterPics,
       trackLeads,
-      ...overrideState,
     };
 
-    // a. Update local app state in memory & IndexedDB
-    await saveStateToIndexedDB(updatedData);
-    setLastSavedTime(updatedData.lastSaved);
-    setSyncStatus('synced');
+    // 1. Save to local IndexedDB cache first
+    await saveStateToIndexedDB(stateToSave);
 
-    // b. Automatically generate and trigger browser file download of updatedData named data.json
-    const blob = new Blob([JSON.stringify(updatedData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "data.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    // 2. Post to Web Worker for background processing
+    if (workerRef.current) {
+      workerRef.current.postMessage({
+        action: 'PROCESS_SAVE',
+        payload: stateToSave,
+      });
+    }
 
-    // c. Display toast and alert message
-    const msg = "Changes saved locally and exported! Please drag and drop the downloaded data.json file into your FBSC-Finance SharePoint folder to update all live users.";
-    showToast(msg);
-    alert(msg);
+    // 3. Write to Linked File Handle if present
+    if (linkedFileHandle) {
+      try {
+        const jsonString = JSON.stringify(stateToSave, null, 2);
+        const writable = await (linkedFileHandle as any).createWritable();
+        await writable.write(jsonString);
+        await writable.close();
+      } catch (err) {
+        console.warn('Could not write directly to file handle:', err);
+      }
+    }
+
+    // 4. Send HTTP POST request to Power Automate Save Webhook
+    try {
+      const response = await fetch(POWER_AUTOMATE_SAVE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(stateToSave),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Save webhook returned error status: ${response.status}`);
+      }
+
+      // On successful save, update local IndexedDB cache and show success alert
+      await saveStateToIndexedDB(stateToSave);
+      setSyncStatus('synced');
+      setLastSavedTime(stateToSave.lastSaved);
+
+      const alertMsg = "Data successfully saved and published live to SharePoint!";
+      showToast(alertMsg);
+      alert(alertMsg);
+    } catch (error) {
+      console.error("Failed to save data via Power Automate Webhook:", error);
+      setSyncStatus('local');
+      showToast("Data saved to local IndexedDB cache (Power Automate save failed).");
+    }
   };
 
   const triggerFileInput = () => {
@@ -550,21 +580,21 @@ export default function App() {
   };
 
   const handleSaveGate = (updatedGate: AuditGate) => {
-    const nextGates = gates.map((g) => (g.id === updatedGate.id ? updatedGate : g));
-    setGates(nextGates);
-    handleSaveAndCommit({ gates: nextGates });
+    setGates((prev) =>
+      prev.map((g) => (g.id === updatedGate.id ? updatedGate : g))
+    );
   };
 
   const handleSaveQuestion = (updatedQuestion: StrategicQuestion) => {
-    const nextQuestions = questions.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q));
-    setQuestions(nextQuestions);
-    handleSaveAndCommit({ questions: nextQuestions });
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
+    );
   };
 
   const handleSaveRiskPoint = (updatedRiskPoint: RiskPoint) => {
-    const nextRiskPoints = riskPoints.map((r) => (r.id === updatedRiskPoint.id ? updatedRiskPoint : r));
-    setRiskPoints(nextRiskPoints);
-    handleSaveAndCommit({ riskPoints: nextRiskPoints });
+    setRiskPoints((prev) =>
+      prev.map((r) => (r.id === updatedRiskPoint.id ? updatedRiskPoint : r))
+    );
   };
 
   return (
@@ -585,7 +615,7 @@ export default function App() {
         onOpenReportModal={() => setIsReportModalOpen(true)}
         onOpenRoadmapReportModal={() => setIsRoadmapReportModalOpen(true)}
         onOpenSettings={handleOpenSettingsClick}
-        onSync={handleFetchSharePointManual}
+        onSync={fetchLatestData}
         syncStatus={syncStatus}
         isLinked={!!linkedFileHandle}
         isEditMode={isEditMode}
@@ -598,7 +628,6 @@ export default function App() {
         onUpdateStartDate={setStartDate}
         totalWorkingDays={totalWorkingDays}
         onUpdateTotalWorkingDays={setTotalWorkingDays}
-        onSaveAndCommit={handleSaveAndCommit}
         isEditMode={isEditMode}
       />
 
@@ -761,7 +790,7 @@ export default function App() {
         onDisconnectFile={handleDisconnectFile}
         onExportJson={handleExportJson}
         onImportJson={handleImportJson}
-        onFetchSharePoint={handleFetchSharePointManual}
+        onFetchSharePoint={fetchLatestData}
         masterPics={masterPics}
         onAddPic={handleAddPic}
         onUpdatePic={handleUpdatePic}
