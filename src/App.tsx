@@ -163,100 +163,83 @@ export default function App() {
     };
   }, []);
 
-  // SharePoint REST API Configuration
-  const SHAREPOINT_SITE_URL = "https://filinvest.sharepoint.com/sites/FBSC-Finance";
-  const SHAREPOINT_FILE_RELATIVE_URL = "/sites/FBSC-Finance/Shared Documents/Horizon_Lease_Admin_Migration_Data.json";
-  const sharePointUrl = `${SHAREPOINT_SITE_URL}/_api/web/GetFileByServerRelativeUrl('${SHAREPOINT_FILE_RELATIVE_URL}')/$value`;
+  // SharePoint REST API Configuration (Direct Unique ID Endpoint)
+  const SHAREPOINT_FILE_URL = "https://filinvest.sharepoint.com/sites/FBSC-Finance/_api/web/GetFileByUniqueId('3c7f0dfa-115f-4a2b-a218-242b1ad74260')/$value";
 
-  const fetchSharePointData = async (): Promise<AppStorageState | null> => {
+  const applyDataToState = (freshData: any) => {
+    if (!freshData) return;
+    if (freshData.startDate) setStartDate(freshData.startDate);
+    if (freshData.totalWorkingDays) setTotalWorkingDays(freshData.totalWorkingDays);
+    if (freshData.gates && Array.isArray(freshData.gates)) setGates(freshData.gates);
+    if (freshData.questions && Array.isArray(freshData.questions)) setQuestions(freshData.questions);
+    if (freshData.riskPoints && Array.isArray(freshData.riskPoints)) setRiskPoints(freshData.riskPoints);
+    if (freshData.combinedData && Array.isArray(freshData.combinedData)) setCombinedData(freshData.combinedData);
+    if (freshData.officeData && Array.isArray(freshData.officeData)) setOfficeData(freshData.officeData);
+    if (freshData.retailData && Array.isArray(freshData.retailData)) setRetailData(freshData.retailData);
+    if (freshData.pillars && Array.isArray(freshData.pillars)) setPillars(freshData.pillars);
+    if (freshData.masterPics && Array.isArray(freshData.masterPics)) setMasterPics(freshData.masterPics);
+    if (freshData.trackLeads) setTrackLeads(freshData.trackLeads);
+    if (freshData.lastSaved) setLastSavedTime(freshData.lastSaved);
+  };
+
+  const fetchLatestData = async (isManual = false): Promise<boolean> => {
     try {
-      const response = await fetch(sharePointUrl, {
+      const response = await fetch(SHAREPOINT_FILE_URL, {
         method: "GET",
         headers: {
-          "Accept": "application/json;odata=verbose",
-          "Cache-Control": "no-cache"
-        },
-        credentials: "include"
+          "Accept": "application/json"
+        }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const text = await response.text();
-      if (!text || !text.trim()) return null;
+      if (!text || !text.trim()) throw new Error("Empty response body");
 
       let freshData: any;
       try {
         freshData = JSON.parse(text);
       } catch (e) {
-        console.warn("Failed to parse SharePoint REST response as JSON:", e);
-        return null;
+        throw new Error("Invalid JSON format");
       }
 
       if (freshData && freshData.d) {
         freshData = typeof freshData.d === 'string' ? JSON.parse(freshData.d) : freshData.d;
       }
 
-      return freshData;
+      // Update local state and save to IndexedDB
+      applyDataToState(freshData);
+      await saveStateToIndexedDB(freshData);
+      setSyncStatus('synced');
+      setLinkedFileName('Horizon_Lease_Admin_Migration_Data.json (SharePoint)');
+      return true;
     } catch (error) {
-      console.warn("SharePoint REST API fetch unavailable or CORS restricted in preview environment:", error);
-      return null;
+      console.warn("SharePoint pull status (expected if CORS/unauthenticated in preview iframe):", error);
+
+      // Fallback to IndexedDB if network fetch fails
+      const cachedData = await loadStateFromIndexedDB();
+      if (cachedData) {
+        applyDataToState(cachedData);
+        setSyncStatus('synced');
+        showToast('Loaded cached data from IndexedDB local storage.');
+      } else {
+        setSyncStatus('local');
+        if (isManual) {
+          alert("Unable to load data. Please check your SharePoint connection or M365 login status.");
+        }
+      }
+      return false;
     }
   };
 
   // Load initial state from SharePoint REST API with IndexedDB fallback
   useEffect(() => {
     const initStorage = async () => {
-      try {
-        // 1. Attempt to fetch JSON directly from SharePoint REST API on startup
-        const spData = await fetchSharePointData();
-        if (spData) {
-          if (spData.startDate) setStartDate(spData.startDate);
-          if (spData.totalWorkingDays) setTotalWorkingDays(spData.totalWorkingDays);
-          if (spData.gates && Array.isArray(spData.gates)) setGates(spData.gates);
-          if (spData.questions && Array.isArray(spData.questions)) setQuestions(spData.questions);
-          if (spData.riskPoints && Array.isArray(spData.riskPoints)) setRiskPoints(spData.riskPoints);
-          if (spData.combinedData && Array.isArray(spData.combinedData)) setCombinedData(spData.combinedData);
-          if (spData.officeData && Array.isArray(spData.officeData)) setOfficeData(spData.officeData);
-          if (spData.retailData && Array.isArray(spData.retailData)) setRetailData(spData.retailData);
-          if (spData.pillars && Array.isArray(spData.pillars)) setPillars(spData.pillars);
-          if (spData.masterPics && Array.isArray(spData.masterPics)) setMasterPics(spData.masterPics);
-          if (spData.trackLeads) setTrackLeads(spData.trackLeads);
-          if (spData.lastSaved) setLastSavedTime(spData.lastSaved);
-
-          setSyncStatus('synced');
-          setLinkedFileName('Horizon_Lease_Admin_Migration_Data.json (SharePoint)');
-          await saveStateToIndexedDB(spData);
-          showToast('Loaded JSON data from SharePoint REST API!');
-          return;
-        }
-
-        // 2. Fallback to IndexedDB local cache if SharePoint REST API is unreachable
-        const handle = await getFileHandleFromIndexedDB();
-        if (handle) {
-          setLinkedFileHandle(handle);
-          setLinkedFileName(handle.name);
-          setSyncStatus('linked');
-        }
-
-        const dbState = await loadStateFromIndexedDB();
-        if (dbState) {
-          if (dbState.startDate) setStartDate(dbState.startDate);
-          if (dbState.totalWorkingDays) setTotalWorkingDays(dbState.totalWorkingDays);
-          if (dbState.gates && Array.isArray(dbState.gates)) setGates(dbState.gates);
-          if (dbState.questions && Array.isArray(dbState.questions)) setQuestions(dbState.questions);
-          if (dbState.riskPoints && Array.isArray(dbState.riskPoints)) setRiskPoints(dbState.riskPoints);
-          if (dbState.combinedData && Array.isArray(dbState.combinedData)) setCombinedData(dbState.combinedData);
-          if (dbState.officeData && Array.isArray(dbState.officeData)) setOfficeData(dbState.officeData);
-          if (dbState.retailData && Array.isArray(dbState.retailData)) setRetailData(dbState.retailData);
-          if (dbState.pillars && Array.isArray(dbState.pillars)) setPillars(dbState.pillars);
-          if (dbState.masterPics && Array.isArray(dbState.masterPics)) setMasterPics(dbState.masterPics);
-          if (dbState.trackLeads) setTrackLeads(dbState.trackLeads);
-          if (dbState.lastSaved) setLastSavedTime(dbState.lastSaved);
-        }
-      } catch (err) {
-        console.error('Failed to load initial storage:', err);
+      const success = await fetchLatestData(false);
+      if (success) {
+        showToast('Loaded JSON data from SharePoint REST API!');
       }
     };
 
@@ -266,48 +249,9 @@ export default function App() {
   const handleFetchSharePointManual = async () => {
     setSyncStatus('saving');
     showToast('Pulling latest data from SharePoint...');
-    const spData = await fetchSharePointData();
-    if (spData) {
-      if (spData.startDate) setStartDate(spData.startDate);
-      if (spData.totalWorkingDays) setTotalWorkingDays(spData.totalWorkingDays);
-      if (spData.gates && Array.isArray(spData.gates)) setGates(spData.gates);
-      if (spData.questions && Array.isArray(spData.questions)) setQuestions(spData.questions);
-      if (spData.riskPoints && Array.isArray(spData.riskPoints)) setRiskPoints(spData.riskPoints);
-      if (spData.combinedData && Array.isArray(spData.combinedData)) setCombinedData(spData.combinedData);
-      if (spData.officeData && Array.isArray(spData.officeData)) setOfficeData(spData.officeData);
-      if (spData.retailData && Array.isArray(spData.retailData)) setRetailData(spData.retailData);
-      if (spData.pillars && Array.isArray(spData.pillars)) setPillars(spData.pillars);
-      if (spData.masterPics && Array.isArray(spData.masterPics)) setMasterPics(spData.masterPics);
-      if (spData.trackLeads) setTrackLeads(spData.trackLeads);
-      if (spData.lastSaved) setLastSavedTime(spData.lastSaved);
-
-      setSyncStatus('synced');
-      setLinkedFileName('Horizon_Lease_Admin_Migration_Data.json (SharePoint)');
-      await saveStateToIndexedDB(spData);
+    const success = await fetchLatestData(true);
+    if (success) {
       showToast('Successfully pulled & synced latest data from SharePoint Document Library!');
-    } else {
-      const dbState = await loadStateFromIndexedDB();
-      if (dbState) {
-        if (dbState.startDate) setStartDate(dbState.startDate);
-        if (dbState.totalWorkingDays) setTotalWorkingDays(dbState.totalWorkingDays);
-        if (dbState.gates && Array.isArray(dbState.gates)) setGates(dbState.gates);
-        if (dbState.questions && Array.isArray(dbState.questions)) setQuestions(dbState.questions);
-        if (dbState.riskPoints && Array.isArray(dbState.riskPoints)) setRiskPoints(dbState.riskPoints);
-        if (dbState.combinedData && Array.isArray(dbState.combinedData)) setCombinedData(dbState.combinedData);
-        if (dbState.officeData && Array.isArray(dbState.officeData)) setOfficeData(dbState.officeData);
-        if (dbState.retailData && Array.isArray(dbState.retailData)) setRetailData(dbState.retailData);
-        if (dbState.pillars && Array.isArray(dbState.pillars)) setPillars(dbState.pillars);
-        if (dbState.masterPics && Array.isArray(dbState.masterPics)) setMasterPics(dbState.masterPics);
-        if (dbState.trackLeads) setTrackLeads(dbState.trackLeads);
-        if (dbState.lastSaved) setLastSavedTime(dbState.lastSaved);
-
-        setSyncStatus('synced');
-        showToast('Loaded data from local storage.');
-      } else {
-        setSyncStatus('local');
-        showToast('Unable to fetch latest data from SharePoint.');
-      }
-      alert('Unable to fetch latest data. Please ensure you are logged into SharePoint/M365 in this browser tab.');
     }
   };
 
