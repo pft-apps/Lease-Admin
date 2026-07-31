@@ -990,7 +990,7 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
                                         <span
                                           className={`text-xs font-semibold ${
                                             task.completed
-                                              ? 'line-through text-slate-400'
+                                              ? 'text-slate-500'
                                               : 'text-slate-900 font-bold'
                                           }`}
                                         >
