@@ -287,12 +287,12 @@ export const assessmentPillars: AssessmentPillar[] = [
     badgeText: 'text-[#007BFF]',
     icon: 'fa-users-gear',
     keyFocusAreas: [
-      'FTE workload modeling matched to 200-300 peak monthly renewals',
+      'Stress-test staffing against 200-300 peak renewal surges; execute 6-pillar revenue assurance audit.',
       'Cross-training FBSC specialists on retail lease nuances',
       'Dedicated hypercare escalation squad configuration'
     ],
     items: [
-      { id: 'p2-1', title: 'FTE workload modeling matched to 200-300 peak monthly renewals', completed: false, remarks: 'Stress-testing headcount allocation during Assessment Week 3.' },
+      { id: 'p2-1', title: 'Stress-test staffing against 200-300 peak renewal surges; execute 6-pillar revenue assurance audit.', completed: false, remarks: 'Stress-testing headcount allocation during Assessment Week 3.' },
       { id: 'p2-2', title: 'Cross-training FBSC specialists on retail lease nuances', completed: false, remarks: 'Shadowing sessions ongoing with Erickson T. Serrano team.' },
       { id: 'p2-3', title: 'Dedicated hypercare escalation squad configuration', completed: true, remarks: 'Hypercare leads assigned (Office: Cely Atas, Retail: Hypercare Squad).' }
     ]
@@ -921,8 +921,8 @@ export const retailGanttPhases: GanttPhase[] = [
         id: 'ret-t6',
         phaseId: 'ret-phase-2',
         dateStr: 'Aug 03–07, 2026 (Week 1)',
-        title: 'WEEK 1: Data Audit, Inventory, & Task Filtering',
-        description: 'Segregated temporary BU cleanup backlogs from true steady-state FBSC tasks. Audited master file accuracy against ≤5% error target.',
+        title: 'WEEK 1: Audit, Inventory, Task Filtering & RCA',
+        description: 'Diagnose root causes; audit tenant files (~1,100 accounts); segregate BU project cleanups from steady-state tasks.',
         stakeholders: ['Data Audit Squad', 'Retail Team'],
         completed: true,
         category: 'Audit'
@@ -931,8 +931,8 @@ export const retailGanttPhases: GanttPhase[] = [
         id: 'ret-t7',
         phaseId: 'ret-phase-2',
         dateStr: 'Aug 10–14, 2026 (Week 2)',
-        title: 'WEEK 2: Exception Trees & 🚦 TOLLGATE 1 REVIEW',
-        description: 'Mapped non-standard lease clauses, eliminated same-day request expectations, established formal SLAs.',
+        title: 'WEEK 2: SOP & Governance, & 🚦 TOLLGATE 1 REVIEW',
+        description: 'SOP & Governance Finalization: Formally document and sign off Desk Procedure SOPs, map exception trees, replace same-day turnaround expectations with defined SLAs. Tollgate 1 Checkpoint.',
         subDetails: [
           'Tollgate 1 Checkpoint Review conducted with Mitch Dumlao, VAM, and FBSC leadership using quantitative RAG scorecard.'
         ],
@@ -945,8 +945,8 @@ export const retailGanttPhases: GanttPhase[] = [
         id: 'ret-t8',
         phaseId: 'ret-phase-2',
         dateStr: 'Aug 17–21, 2026 (Week 3)',
-        title: 'WEEK 3: Capacity Stress-Testing & Financial Leakage Quantification',
-        description: 'Stress-tested headcount against 200–300 peak renewal surges. Quantified financial exposure in CAM, turnover rent, and indexation gaps.',
+        title: 'WEEK 3: Capacity Stress-Testing & Revenue Assurance',
+        description: 'Stress-test staffing against 200–300 peak renewal surges; execute 6-pillar revenue assurance audit.',
         stakeholders: ['Dela Torre', 'Carnetes', 'Capacity Squad'],
         completed: false,
         category: 'Capacity'
@@ -1127,8 +1127,8 @@ export const combinedGanttPhases: GanttPhase[] = [
         id: 'comb-t8',
         phaseId: 'comb-phase-2',
         dateStr: 'Aug 03–07, 2026 [Track B]',
-        title: 'Retail WEEK 1: Data Audit, Inventory, & Task Filtering',
-        description: 'Audited master file accuracy (≤5% target) and separated transient BU cleanup from steady-state FBSC tasks.',
+        title: 'Retail WEEK 1: Audit, Inventory, Task Filtering & RCA',
+        description: 'Diagnose root causes; audit tenant files (~1,100 accounts); segregate BU project cleanups from steady-state tasks.',
         stakeholders: ['Data Audit Squad', 'Retail Team'],
         completed: true,
         category: 'Track B: Retail'
@@ -1147,8 +1147,8 @@ export const combinedGanttPhases: GanttPhase[] = [
         id: 'comb-t10',
         phaseId: 'comb-phase-2',
         dateStr: 'Aug 10–14, 2026 [Track B]',
-        title: 'Retail WEEK 2: Exception Trees & 🚦 TOLLGATE 1 REVIEW',
-        description: 'Mapped non-standard lease clauses & SLAs. Tollgate 1 checkpoint review with Mitch Dumlao, VAM, and FBSC.',
+        title: 'Retail WEEK 2: SOP & Governance, & 🚦 TOLLGATE 1 REVIEW',
+        description: 'SOP & Governance Finalization: Formally document and sign off Desk Procedure SOPs, map exception trees, replace same-day turnaround expectations with defined SLAs. Tollgate 1 Checkpoint.',
         stakeholders: ['Mitch Dumlao', 'VAM', 'FBSC Leadership'],
         completed: true,
         category: 'Track B: Retail',
@@ -1169,8 +1169,8 @@ export const combinedGanttPhases: GanttPhase[] = [
         id: 'comb-t12',
         phaseId: 'comb-phase-2',
         dateStr: 'Aug 17–21, 2026 [Track B]',
-        title: 'Retail WEEK 3: Capacity Stress-Testing & Financial Leakage',
-        description: 'Stress-tested headcount against 200–300 peak renewal surges. Quantified CAM/turnover rent risks.',
+        title: 'Retail WEEK 3: Capacity Stress-Testing & Revenue Assurance',
+        description: 'Stress-test staffing against 200–300 peak renewal surges; execute 6-pillar revenue assurance audit.',
         stakeholders: ['Dela Torre', 'Carnetes', 'Capacity Squad'],
         completed: false,
         category: 'Track B: Retail'

@@ -28,6 +28,23 @@ import { ExecutionRoadmap } from './components/ExecutionRoadmap';
 import { PillarsGrid } from './components/PillarsGrid';
 import { RiskMatrixChart } from './components/RiskMatrixChart';
 import { AuditScorecard } from './components/AuditScorecard';
+
+const migratePillars = (pillars: AssessmentPillar[]): AssessmentPillar[] => {
+  return pillars.map((p) => ({
+    ...p,
+    keyFocusAreas: p.keyFocusAreas.map((kfa) =>
+      kfa === 'FTE workload modeling matched to 200-300 peak monthly renewals'
+        ? 'Stress-test staffing against 200-300 peak renewal surges; execute 6-pillar revenue assurance audit.'
+        : kfa
+    ),
+    items: p.items.map((item) => ({
+      ...item,
+      title: item.title === 'FTE workload modeling matched to 200-300 peak monthly renewals'
+        ? 'Stress-test staffing against 200-300 peak renewal surges; execute 6-pillar revenue assurance audit.'
+        : item.title
+    }))
+  }));
+};
 import { StrategicQuestions } from './components/StrategicQuestions';
 import { GateDetailModal } from './components/GateDetailModal';
 import { ReportExportModal } from './components/ReportExportModal';
@@ -214,7 +231,9 @@ export default function App() {
     if (data.officeData && Array.isArray(data.officeData)) setOfficeData(mergeGanttPhases(officeGanttPhases, data.officeData));
     if (data.retailData && Array.isArray(data.retailData)) setRetailData(mergeGanttPhases(retailGanttPhases, data.retailData));
 
-    if (data.pillars && Array.isArray(data.pillars)) setPillars(data.pillars);
+    if (data.pillars && Array.isArray(data.pillars)) {
+      setPillars(migratePillars(data.pillars));
+    }
     if (data.masterPics && Array.isArray(data.masterPics)) setMasterPics(data.masterPics);
     if (data.trackLeads) setTrackLeads(data.trackLeads);
     if (data.lastSaved) setLastSavedTime(data.lastSaved);
@@ -540,7 +559,7 @@ export default function App() {
           if (parsed.combinedData && Array.isArray(parsed.combinedData)) setCombinedData(parsed.combinedData);
           if (parsed.officeData && Array.isArray(parsed.officeData)) setOfficeData(parsed.officeData);
           if (parsed.retailData && Array.isArray(parsed.retailData)) setRetailData(parsed.retailData);
-          if (parsed.pillars && Array.isArray(parsed.pillars)) setPillars(parsed.pillars);
+          if (parsed.pillars && Array.isArray(parsed.pillars)) setPillars(migratePillars(parsed.pillars));
           if (parsed.masterPics && Array.isArray(parsed.masterPics)) setMasterPics(parsed.masterPics);
           if (parsed.trackLeads) setTrackLeads(parsed.trackLeads);
           showToast(`Successfully linked & loaded storage file: ${handle.name}`);
@@ -677,7 +696,7 @@ export default function App() {
         if (parsed.combinedData && Array.isArray(parsed.combinedData)) setCombinedData(parsed.combinedData);
         if (parsed.officeData && Array.isArray(parsed.officeData)) setOfficeData(parsed.officeData);
         if (parsed.retailData && Array.isArray(parsed.retailData)) setRetailData(parsed.retailData);
-        if (parsed.pillars && Array.isArray(parsed.pillars)) setPillars(parsed.pillars);
+        if (parsed.pillars && Array.isArray(parsed.pillars)) setPillars(migratePillars(parsed.pillars));
         if (parsed.masterPics && Array.isArray(parsed.masterPics)) setMasterPics(parsed.masterPics);
         if (parsed.trackLeads) setTrackLeads(parsed.trackLeads);
 
