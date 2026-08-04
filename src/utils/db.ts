@@ -15,6 +15,7 @@ export interface AppStorageState {
   combinedData: any[];
   officeData: any[];
   retailData: any[];
+  dataRequests: any[];
   pillars: any[];
   masterPics: MasterPIC[];
   trackLeads: Record<string, string>;

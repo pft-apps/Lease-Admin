@@ -8,7 +8,6 @@ interface RoadmapReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   combinedData: GanttPhase[];
-  setCombinedData?: React.Dispatch<React.SetStateAction<GanttPhase[]>>;
   officeData: GanttPhase[];
   setOfficeData?: React.Dispatch<React.SetStateAction<GanttPhase[]>>;
   retailData: GanttPhase[];
@@ -315,7 +314,6 @@ export const RoadmapReportModal: React.FC<RoadmapReportModalProps> = ({
   isOpen,
   onClose,
   combinedData,
-  setCombinedData,
   officeData,
   setOfficeData,
   retailData,
@@ -329,7 +327,7 @@ export const RoadmapReportModal: React.FC<RoadmapReportModalProps> = ({
   const [selectedTrack, setSelectedTrack] = useState<TrackFilter>('all');
   const [viewMode, setViewMode] = useState<GanttViewMode>('both');
 
-  const windowProgress = getAssessmentWorkingDaysProgress(startDate, totalWorkingDays, '2026-07-29');
+  const windowProgress = getAssessmentWorkingDaysProgress(startDate, totalWorkingDays);
   const { endDate, elapsedDays, remainingDays } = windowProgress;
 
   // Editable signatories state (Initialized with blank Name and Title)
@@ -422,7 +420,6 @@ export const RoadmapReportModal: React.FC<RoadmapReportModalProps> = ({
         };
       });
 
-    if (setCombinedData) setCombinedData(updateList);
     if (setOfficeData) setOfficeData(updateList);
     if (setRetailData) setRetailData(updateList);
   };

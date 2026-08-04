@@ -114,3 +114,22 @@ export interface StrategicQuestion {
   resolved: boolean;
   impactLevel: 'Critical' | 'High' | 'Medium';
 }
+
+export interface DataRequestItem {
+  id: string; // e.g., DRM-01
+  riskDimension: string;
+  itemRequested: string;
+  targetScope: string;
+  description: string;
+  preferredFormat: string;
+  assignedOwner: string;
+  priority: string;
+  targetDateStr: string;
+  submittedOffice: 'Yes' | 'No' | '';
+  dateSubmittedOffice: string;
+  auditStatusOffice: 'Not Yet Started' | 'In-Progress' | 'Completed' | 'Deferred' | '';
+  submittedRetail: 'Yes' | 'No' | '';
+  dateSubmittedRetail: string;
+  auditStatusRetail: 'Not Yet Started' | 'In-Progress' | 'Completed' | 'Deferred' | '';
+  auditorRemarks: string;
+}

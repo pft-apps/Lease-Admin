@@ -46,6 +46,9 @@ const migratePillars = (pillars: AssessmentPillar[]): AssessmentPillar[] => {
   }));
 };
 import { StrategicQuestions } from './components/StrategicQuestions';
+import { DataRequestMatrix } from './components/DataRequestMatrix';
+import { initialDataRequests } from './data/mockDataRequest';
+import { DataRequestItem } from './types';
 import { GateDetailModal } from './components/GateDetailModal';
 import { ReportExportModal } from './components/ReportExportModal';
 import { RoadmapReportModal } from './components/RoadmapReportModal';
@@ -75,15 +78,67 @@ export default function App() {
   // Strategic Questions & Risk Points state
   const [questions, setQuestions] = useState<StrategicQuestion[]>(initialStrategicQuestions);
   const [riskPoints, setRiskPoints] = useState<RiskPoint[]>(initialRiskPoints);
+  const [dataRequests, setDataRequests] = useState<DataRequestItem[]>(initialDataRequests);
 
   // Assessment Window Start Date & Duration (Working Days Mon-Fri)
   const [startDate, setStartDate] = useState<string>('2026-07-20');
   const [totalWorkingDays, setTotalWorkingDays] = useState<number>(30);
 
   // Shared Roadmap Gantt Datasets
-  const [combinedData, setCombinedData] = useState<GanttPhase[]>(combinedGanttPhases);
-  const [officeData, setOfficeData] = useState<GanttPhase[]>(officeGanttPhases);
   const [retailData, setRetailData] = useState<GanttPhase[]>(retailGanttPhases);
+  const [officeData, setOfficeData] = useState<GanttPhase[]>(officeGanttPhases);
+
+  const combinedData: GanttPhase[] = [
+    {
+      id: 'comb-phase-0',
+      phaseNumber: 'Phase 0 & 1',
+      title: 'Discovery & Blueprint',
+      dateRange: 'Jul 20 – Aug 03, 2026',
+      status: 'completed',
+      statusText: 'Completed',
+      accentColor: 'border-[#003886]',
+      barColor: 'bg-[#003886]',
+      ganttStartPct: 0,
+      ganttWidthPct: 25,
+      tasks: [
+        ...(retailData.find(p => p.id === 'ret-phase-0')?.tasks || []),
+        ...(retailData.find(p => p.id === 'ret-phase-1')?.tasks || []),
+        ...(officeData.find(p => p.id === 'off-phase-1')?.tasks || [])
+      ]
+    },
+    {
+      id: 'comb-phase-2',
+      phaseNumber: 'Phase 2',
+      title: 'Implementation & Assessment',
+      dateRange: 'Aug 03 – Aug 28, 2026',
+      status: 'in-progress',
+      statusText: 'In Progress',
+      accentColor: 'border-[#00C4E7]',
+      barColor: 'bg-[#00C4E7]',
+      ganttStartPct: 25,
+      ganttWidthPct: 40,
+      tasks: [
+        ...(officeData.find(p => p.id === 'off-phase-2')?.tasks || []),
+        ...(retailData.find(p => p.id === 'ret-phase-2')?.tasks || [])
+      ]
+    },
+    {
+      id: 'comb-phase-3',
+      phaseNumber: 'Phase 3',
+      title: 'Cutover & Hypercare',
+      dateRange: 'Aug 17 – Nov 2026',
+      status: 'pending',
+      statusText: 'Pending',
+      accentColor: 'border-emerald-500',
+      barColor: 'bg-emerald-500',
+      ganttStartPct: 65,
+      ganttWidthPct: 35,
+      tasks: [
+        ...(officeData.find(p => p.id === 'off-phase-3')?.tasks || []),
+        ...(retailData.find(p => p.id === 'ret-phase-3')?.tasks || [])
+      ]
+    }
+  ];
 
   // Assessment Pillars State
   const [pillars, setPillars] = useState<AssessmentPillar[]>(() =>
@@ -227,9 +282,9 @@ export default function App() {
       });
     };
 
-    if (data.combinedData && Array.isArray(data.combinedData)) setCombinedData(mergeGanttPhases(combinedGanttPhases, data.combinedData));
     if (data.officeData && Array.isArray(data.officeData)) setOfficeData(mergeGanttPhases(officeGanttPhases, data.officeData));
     if (data.retailData && Array.isArray(data.retailData)) setRetailData(mergeGanttPhases(retailGanttPhases, data.retailData));
+    if (data.dataRequests && Array.isArray(data.dataRequests)) setDataRequests(data.dataRequests);
 
     if (data.pillars && Array.isArray(data.pillars)) {
       setPillars(migratePillars(data.pillars));
@@ -338,6 +393,7 @@ export default function App() {
       combinedData,
       officeData,
       retailData,
+      dataRequests,
       pillars,
       masterPics,
       trackLeads,
@@ -378,6 +434,7 @@ export default function App() {
       combinedData,
       officeData,
       retailData,
+      dataRequests,
       pillars,
       masterPics,
       trackLeads,
@@ -455,6 +512,7 @@ export default function App() {
       combinedData,
       officeData,
       retailData,
+      dataRequests,
       pillars,
       masterPics,
       trackLeads,
@@ -556,7 +614,7 @@ export default function App() {
           if (parsed.gates && Array.isArray(parsed.gates)) setGates(parsed.gates);
           if (parsed.questions && Array.isArray(parsed.questions)) setQuestions(parsed.questions);
           if (parsed.riskPoints && Array.isArray(parsed.riskPoints)) setRiskPoints(parsed.riskPoints);
-          if (parsed.combinedData && Array.isArray(parsed.combinedData)) setCombinedData(parsed.combinedData);
+          if (parsed.dataRequests && Array.isArray(parsed.dataRequests)) setDataRequests(parsed.dataRequests);
           if (parsed.officeData && Array.isArray(parsed.officeData)) setOfficeData(parsed.officeData);
           if (parsed.retailData && Array.isArray(parsed.retailData)) setRetailData(parsed.retailData);
           if (parsed.pillars && Array.isArray(parsed.pillars)) setPillars(migratePillars(parsed.pillars));
@@ -595,6 +653,7 @@ export default function App() {
       combinedData,
       officeData,
       retailData,
+      dataRequests,
       pillars,
       masterPics,
       trackLeads,
@@ -660,6 +719,7 @@ export default function App() {
       combinedData,
       officeData,
       retailData,
+      dataRequests,
       pillars,
       masterPics,
       trackLeads,
@@ -693,7 +753,7 @@ export default function App() {
         if (parsed.gates && Array.isArray(parsed.gates)) setGates(parsed.gates);
         if (parsed.questions && Array.isArray(parsed.questions)) setQuestions(parsed.questions);
         if (parsed.riskPoints && Array.isArray(parsed.riskPoints)) setRiskPoints(parsed.riskPoints);
-        if (parsed.combinedData && Array.isArray(parsed.combinedData)) setCombinedData(parsed.combinedData);
+        if (parsed.dataRequests && Array.isArray(parsed.dataRequests)) setDataRequests(parsed.dataRequests);
         if (parsed.officeData && Array.isArray(parsed.officeData)) setOfficeData(parsed.officeData);
         if (parsed.retailData && Array.isArray(parsed.retailData)) setRetailData(parsed.retailData);
         if (parsed.pillars && Array.isArray(parsed.pillars)) setPillars(migratePillars(parsed.pillars));
@@ -852,7 +912,6 @@ export default function App() {
           <div className="animate-fadeIn">
             <ExecutionRoadmap
               combinedData={combinedData}
-              setCombinedData={setCombinedData}
               officeData={officeData}
               setOfficeData={setOfficeData}
               retailData={retailData}
@@ -909,6 +968,28 @@ export default function App() {
             />
           </div>
         )}
+
+        {/* Data Request Matrix */}
+        {(activeTab === 'all' || activeTab === 'data-request-matrix') && (
+          <div className="animate-fadeIn">
+            <DataRequestMatrix
+              dataRequests={dataRequests}
+              setDataRequests={setDataRequests}
+              isEditMode={isEditMode}
+            />
+            {isEditMode && (
+              <div className="flex justify-end mt-4 mb-8">
+                <button
+                  onClick={() => handleSaveAndCommit({ dataRequests })}
+                  className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                >
+                  <i className="fa-solid fa-save"></i> Save DRM Changes
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
       </main>
 
       {/* Corporate Footer */}
@@ -934,7 +1015,6 @@ export default function App() {
         isOpen={isRoadmapReportModalOpen}
         onClose={() => setIsRoadmapReportModalOpen(false)}
         combinedData={combinedData}
-        setCombinedData={setCombinedData}
         officeData={officeData}
         setOfficeData={setOfficeData}
         retailData={retailData}

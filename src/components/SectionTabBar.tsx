@@ -71,6 +71,13 @@ export const SectionTabBar: React.FC<SectionTabBarProps> = ({
       badge: '21 Resolved',
       description: 'Key architectural & operational decisions resolved',
     },
+    {
+      id: 'data-request-matrix',
+      label: 'Data Request Matrix',
+      icon: 'fa-solid fa-table-list',
+      badge: '11 Items',
+      description: 'Data & document items requested for audit',
+    },
   ];
 
   return (

@@ -30,7 +30,7 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
     setTempWorkingDays(totalWorkingDays);
   }, [totalWorkingDays]);
 
-  const windowProgress = getAssessmentWorkingDaysProgress(startDate, totalWorkingDays, '2026-07-29');
+  const windowProgress = getAssessmentWorkingDaysProgress(startDate, totalWorkingDays);
   const { endDate, elapsedDays, remainingDays, progressPercent } = windowProgress;
 
   const dateRangeStr = formatDateRange(new Date(startDate), endDate);

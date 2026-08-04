@@ -32,7 +32,6 @@ const STANDARD_PIC_OPTIONS = [
 
 interface ExecutionRoadmapProps {
   combinedData?: GanttPhase[];
-  setCombinedData?: React.Dispatch<React.SetStateAction<GanttPhase[]>>;
   officeData?: GanttPhase[];
   setOfficeData?: React.Dispatch<React.SetStateAction<GanttPhase[]>>;
   retailData?: GanttPhase[];
@@ -51,7 +50,6 @@ interface ExecutionRoadmapProps {
 
 export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   combinedData: extCombined,
-  setCombinedData: extSetCombined,
   officeData: extOffice,
   setOfficeData: extSetOffice,
   retailData: extRetail,
@@ -78,7 +76,6 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   const officeData = extOffice || localOffice;
   const retailData = extRetail || localRetail;
 
-  const setCombinedData = extSetCombined || setLocalCombined;
   const setOfficeData = extSetOffice || setLocalOffice;
   const setRetailData = extSetRetail || setLocalRetail;
 
@@ -120,17 +117,68 @@ export const ExecutionRoadmap: React.FC<ExecutionRoadmapProps> = ({
   const [filterStakeholder, setFilterStakeholder] = useState<string>('all');
 
   // Select current active dataset
+  const computedCombinedData: GanttPhase[] = [
+    {
+      id: 'comb-phase-0',
+      phaseNumber: 'Phase 0 & 1',
+      title: 'Discovery & Blueprint',
+      dateRange: 'Jul 20 – Aug 03, 2026',
+      status: 'completed',
+      statusText: 'Completed',
+      accentColor: 'border-[#003886]',
+      barColor: 'bg-[#003886]',
+      ganttStartPct: 0,
+      ganttWidthPct: 25,
+      tasks: [
+        ...(retailData.find(p => p.id === 'ret-phase-0')?.tasks || []),
+        ...(retailData.find(p => p.id === 'ret-phase-1')?.tasks || []),
+        ...(officeData.find(p => p.id === 'off-phase-1')?.tasks || [])
+      ]
+    },
+    {
+      id: 'comb-phase-2',
+      phaseNumber: 'Phase 2',
+      title: 'Implementation & Assessment',
+      dateRange: 'Aug 03 – Aug 28, 2026',
+      status: 'in-progress',
+      statusText: 'In Progress',
+      accentColor: 'border-[#00C4E7]',
+      barColor: 'bg-[#00C4E7]',
+      ganttStartPct: 25,
+      ganttWidthPct: 40,
+      tasks: [
+        ...(officeData.find(p => p.id === 'off-phase-2')?.tasks || []),
+        ...(retailData.find(p => p.id === 'ret-phase-2')?.tasks || [])
+      ]
+    },
+    {
+      id: 'comb-phase-3',
+      phaseNumber: 'Phase 3',
+      title: 'Cutover & Hypercare',
+      dateRange: 'Aug 17 – Nov 2026',
+      status: 'pending',
+      statusText: 'Pending',
+      accentColor: 'border-emerald-500',
+      barColor: 'bg-emerald-500',
+      ganttStartPct: 65,
+      ganttWidthPct: 35,
+      tasks: [
+        ...(officeData.find(p => p.id === 'off-phase-3')?.tasks || []),
+        ...(retailData.find(p => p.id === 'ret-phase-3')?.tasks || [])
+      ]
+    }
+  ];
+
   const currentPhases =
     activeTab === 'office'
       ? officeData
       : activeTab === 'retail'
       ? retailData
-      : combinedData;
+      : computedCombinedData;
 
   const setCurrentPhases = (updater: (prev: GanttPhase[]) => GanttPhase[]) => {
     if (activeTab === 'office') setOfficeData(updater);
     else if (activeTab === 'retail') setRetailData(updater);
-    else setCombinedData(updater);
   };
 
   // Compute stats for current tab
