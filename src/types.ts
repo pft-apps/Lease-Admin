@@ -125,11 +125,11 @@ export interface DataRequestItem {
   assignedOwner: string;
   priority: string;
   targetDateStr: string;
-  submittedOffice: 'Yes' | 'No' | '';
+  submittedOffice: 'Yes' | 'No' | '' | 'N/A';
   dateSubmittedOffice: string;
-  auditStatusOffice: 'Not Yet Started' | 'In-Progress' | 'Completed' | 'Deferred' | '';
-  submittedRetail: 'Yes' | 'No' | '';
+  auditStatusOffice: 'Not Yet Started' | 'In-Progress' | 'Completed' | 'Deferred' | '' | 'N/A';
+  submittedRetail: 'Yes' | 'No' | '' | 'N/A';
   dateSubmittedRetail: string;
-  auditStatusRetail: 'Not Yet Started' | 'In-Progress' | 'Completed' | 'Deferred' | '';
+  auditStatusRetail: 'Not Yet Started' | 'In-Progress' | 'Completed' | 'Deferred' | '' | 'N/A';
   auditorRemarks: string;
 }

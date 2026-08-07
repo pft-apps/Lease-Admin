@@ -13,9 +13,32 @@ export const DataRequestMatrix: React.FC<DataRequestMatrixProps> = ({
   isEditMode
 }) => {
   const updateItem = (id: string, field: keyof DataRequestItem, value: string) => {
-    setDataRequests(prev => prev.map(item =>
-      item.id === id ? { ...item, [field]: value } : item
-    ));
+    setDataRequests(prev => prev.map(item => {
+      if (item.id === id) {
+        const newItem = { ...item, [field]: value };
+        
+        if (field === 'submittedOffice') {
+          if (value === 'N/A') {
+            newItem.dateSubmittedOffice = '';
+            newItem.auditStatusOffice = 'N/A';
+          } else if (item.submittedOffice === 'N/A' && value !== 'N/A') {
+            newItem.auditStatusOffice = 'Not Yet Started';
+          }
+        }
+        
+        if (field === 'submittedRetail') {
+          if (value === 'N/A') {
+            newItem.dateSubmittedRetail = '';
+            newItem.auditStatusRetail = 'N/A';
+          } else if (item.submittedRetail === 'N/A' && value !== 'N/A') {
+            newItem.auditStatusRetail = 'Not Yet Started';
+          }
+        }
+
+        return newItem;
+      }
+      return item;
+    }));
   };
 
   const addRow = () => {
@@ -198,6 +221,7 @@ export const DataRequestMatrix: React.FC<DataRequestMatrixProps> = ({
                       <option value="">-</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
+                      <option value="N/A">N/A</option>
                     </select>
                   ) : (
                     <span className={`font-bold ${item.submittedOffice === 'Yes' ? 'text-emerald-400' : item.submittedOffice === 'No' ? 'text-rose-400' : 'text-slate-500'}`}>
@@ -207,36 +231,45 @@ export const DataRequestMatrix: React.FC<DataRequestMatrixProps> = ({
                 </td>
                 <td className="px-2 py-3 text-center border-r border-slate-700/50 bg-[#0C3373]/10">
                   {isEditMode ? (
-                    <input
-                      type="date"
-                      className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
-                      value={item.dateSubmittedOffice}
-                      onChange={(e) => updateItem(item.id, 'dateSubmittedOffice', e.target.value)}
-                    />
+                    item.submittedOffice === 'N/A' ? (
+                      <span className="text-slate-500 font-bold">N/A</span>
+                    ) : (
+                      <input
+                        type="date"
+                        className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
+                        value={item.dateSubmittedOffice}
+                        onChange={(e) => updateItem(item.id, 'dateSubmittedOffice', e.target.value)}
+                      />
+                    )
                   ) : (
                     <span className="text-slate-300">
-                      {item.dateSubmittedOffice ? new Date(item.dateSubmittedOffice).toLocaleDateString() : '-'}
+                      {item.submittedOffice === 'N/A' ? 'N/A' : (item.dateSubmittedOffice ? new Date(item.dateSubmittedOffice).toLocaleDateString() : '-')}
                     </span>
                   )}
                 </td>
                 <td className="px-2 py-3 text-center border-r border-slate-700/50 bg-[#0C3373]/10">
                   {isEditMode ? (
-                    <select
-                      className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
-                      value={item.auditStatusOffice}
-                      onChange={(e) => updateItem(item.id, 'auditStatusOffice', e.target.value)}
-                    >
-                      <option value="">-</option>
-                      <option value="Not Yet Started">Not Yet Started</option>
-                      <option value="In-Progress">In-Progress</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Deferred">Deferred</option>
-                    </select>
+                    item.submittedOffice === 'N/A' ? (
+                      <span className="text-slate-500 font-bold uppercase text-[10px] tracking-wider">N/A</span>
+                    ) : (
+                      <select
+                        className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
+                        value={item.auditStatusOffice}
+                        onChange={(e) => updateItem(item.id, 'auditStatusOffice', e.target.value)}
+                      >
+                        <option value="">-</option>
+                        <option value="Not Yet Started">Not Yet Started</option>
+                        <option value="In-Progress">In-Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Deferred">Deferred</option>
+                      </select>
+                    )
                   ) : (
                     <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
                       item.auditStatusOffice === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                       item.auditStatusOffice === 'In-Progress' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
                       item.auditStatusOffice === 'Deferred' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                      item.auditStatusOffice === 'N/A' ? 'bg-slate-500/20 text-slate-500 border border-slate-500/30' :
                       'bg-slate-500/20 text-slate-400 border border-slate-500/30'
                     }`}>
                       {item.auditStatusOffice || 'Not Yet Started'}
@@ -255,6 +288,7 @@ export const DataRequestMatrix: React.FC<DataRequestMatrixProps> = ({
                       <option value="">-</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
+                      <option value="N/A">N/A</option>
                     </select>
                   ) : (
                     <span className={`font-bold ${item.submittedRetail === 'Yes' ? 'text-emerald-400' : item.submittedRetail === 'No' ? 'text-rose-400' : 'text-slate-500'}`}>
@@ -264,36 +298,45 @@ export const DataRequestMatrix: React.FC<DataRequestMatrixProps> = ({
                 </td>
                 <td className="px-2 py-3 text-center border-r border-slate-700/50 bg-[#0A2A5E]/10">
                   {isEditMode ? (
-                    <input
-                      type="date"
-                      className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
-                      value={item.dateSubmittedRetail}
-                      onChange={(e) => updateItem(item.id, 'dateSubmittedRetail', e.target.value)}
-                    />
+                    item.submittedRetail === 'N/A' ? (
+                      <span className="text-slate-500 font-bold">N/A</span>
+                    ) : (
+                      <input
+                        type="date"
+                        className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
+                        value={item.dateSubmittedRetail}
+                        onChange={(e) => updateItem(item.id, 'dateSubmittedRetail', e.target.value)}
+                      />
+                    )
                   ) : (
                     <span className="text-slate-300">
-                      {item.dateSubmittedRetail ? new Date(item.dateSubmittedRetail).toLocaleDateString() : '-'}
+                      {item.submittedRetail === 'N/A' ? 'N/A' : (item.dateSubmittedRetail ? new Date(item.dateSubmittedRetail).toLocaleDateString() : '-')}
                     </span>
                   )}
                 </td>
                 <td className="px-2 py-3 text-center border-r border-slate-700/50 bg-[#0A2A5E]/10">
                   {isEditMode ? (
-                    <select
-                      className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
-                      value={item.auditStatusRetail}
-                      onChange={(e) => updateItem(item.id, 'auditStatusRetail', e.target.value)}
-                    >
-                      <option value="">-</option>
-                      <option value="Not Yet Started">Not Yet Started</option>
-                      <option value="In-Progress">In-Progress</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Deferred">Deferred</option>
-                    </select>
+                    item.submittedRetail === 'N/A' ? (
+                      <span className="text-slate-500 font-bold uppercase text-[10px] tracking-wider">N/A</span>
+                    ) : (
+                      <select
+                        className="w-full bg-[#041530] border border-slate-600 rounded text-slate-300 text-sm px-1 py-1 outline-none focus:border-[#00C4E7]"
+                        value={item.auditStatusRetail}
+                        onChange={(e) => updateItem(item.id, 'auditStatusRetail', e.target.value)}
+                      >
+                        <option value="">-</option>
+                        <option value="Not Yet Started">Not Yet Started</option>
+                        <option value="In-Progress">In-Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Deferred">Deferred</option>
+                      </select>
+                    )
                   ) : (
                     <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
                       item.auditStatusRetail === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                       item.auditStatusRetail === 'In-Progress' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
                       item.auditStatusRetail === 'Deferred' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                      item.auditStatusRetail === 'N/A' ? 'bg-slate-500/20 text-slate-500 border border-slate-500/30' :
                       'bg-slate-500/20 text-slate-400 border border-slate-500/30'
                     }`}>
                       {item.auditStatusRetail || 'Not Yet Started'}
